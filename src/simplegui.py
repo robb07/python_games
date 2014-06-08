@@ -1,0 +1,340 @@
+'''
+
+Simplegui module has frame class that supports drawing and events.
+
+Created on Jun 7, 2014
+
+@author: Robb
+'''
+
+import os
+import pygame
+
+if not pygame.font: print('Warning, fonts disabled')
+if not pygame.mixer: print('Warning, sound disabled')
+ 
+# initializations
+pygame.init()
+
+ALIGNMENTS = (('left','center','right'),('top','middle','bottom'))
+
+class Frame(object):
+    '''
+    Creates a window for drawing and event handling.
+    '''
+
+
+    def __init__(self, title, size = (640, 480), button_panel_width = 0, fps = 60):
+        '''
+        Creates the frame
+        '''
+        self.running = False
+        self.window = pygame.display.set_mode((size[0]+button_panel_width,size[1]))
+        self.canvas_size = size
+        self.button_panel_size = (button_panel_width,size[1])
+        self.canvas = Canvas(size)
+        
+        if button_panel_width != 0:
+            self.button_panel = ButtonPanel(self.button_panel_size,'Grey')
+        else:
+            self.button_panel = None
+        
+        #self.buttons = []
+        
+        pygame.display.set_caption(title)
+        self.FPS = fps
+        
+        self.draw_handler = None
+        self.mouse_left_click_handler = None
+        self.mouse_right_click_handler = None
+        self.mouse_move_handler = None
+        self.key_down_handler = None
+        self.key_up_handler = None
+        
+        self.surface_count = 0
+        
+    def start(self):
+        '''Starts the frame'''
+        self.running = True
+        self.run()
+        
+    def stop(self):
+        '''Stops the frame'''
+        self.running = False
+        
+    def set_draw_handler(self, draw_handler):
+        '''Sets the draw handler for the frame'''
+        self.draw_handler = draw_handler
+        
+    def set_background_color(self, color):
+        '''Sets the frames background color'''
+        self.canvas.set_background_color(color)
+        
+    def set_mouse_left_click_handler(self, mouse_left_click_handler):
+        '''Sets the left click handler for the mouse'''
+        self.mouse_left_click_handler = mouse_left_click_handler
+    
+    def set_mouse_right_click_handler(self, mouse_right_click_handler):
+        '''Sets the right click handler for the mouse'''
+        self.mouse_right_click_handler = mouse_right_click_handler
+    
+    def set_mouse_move_handler(self, mouse_move_handler):
+        '''Sets the motion handler for the mouse'''
+        self.mouse_move_handler = mouse_move_handler
+    
+    def set_key_down_handler(self, key_down_handler):
+        '''Sets the key down handler'''
+        self.key_down_handler = key_down_handler
+    
+    def set_key_up_handler(self, key_up_handler):
+        '''Sets the key up handler'''
+        self.key_up_handler = key_up_handler
+    
+    def set_font_sizes(self, sizes):
+        self.canvas.set_font_sizes(sizes)
+        self.button_panel.set_font_sizes(sizes)
+    
+    def add_button(self, text, handler, width, font_height):
+        self.button_panel.add_button(text, handler, width, font_height)
+        
+    def button_click_handler(self, click_pos):
+        pos = (click_pos[0] - self.canvas_size[0], click_pos[1])
+        self.button_panel.button_click_handlers(pos)
+        
+    def call_draw_handler(self):
+        '''Clears the screen and calls the draw handler'''
+        if self.surface_count or not self.button_panel:
+            self.canvas.draw_background()
+            
+            if self.draw_handler:
+                self.draw_handler(self.canvas)
+            
+            self.window.blit(self.canvas.Surface,(0,0))
+            self.surface_count = 0
+        else:
+            self.button_panel.draw_background()
+            self.button_panel.draw_buttons()
+            self.window.blit(self.button_panel.Surface,(self.canvas_size[0],0))
+            self.surface_count = 1
+        # update the display
+        pygame.display.update()
+            
+    def run(self):
+        '''Runs the frame, event handlers, and timers'''
+        clock = pygame.time.Clock() 
+        
+        while self.running:
+            # event queue iteration
+            for event in pygame.event.get():
+                
+                # window GUI ('x' the window)
+                if event.type == pygame.QUIT:
+                    self.stop()
+    
+                # input - key and mouse event handlers
+                elif event.type == pygame.MOUSEBUTTONDOWN:
+                    # just respond to left mouse clicks
+                    
+                    if pygame.mouse.get_pressed()[0]:
+                        if self.mouse_left_click_handler:
+                            self.mouse_left_click_handler(pygame.mouse.get_pos())
+                            self.button_click_handler(pygame.mouse.get_pos())
+                    elif pygame.mouse.get_pressed()[2]:
+                        if self.mouse_right_click_handler:
+                            self.mouse_right_click_handler(pygame.mouse.get_pos())
+                            
+                elif event.type == pygame.MOUSEMOTION:
+                    if self.mouse_move_handler:
+                        self.mouse_move_handler(pygame.mouse.get_pos())
+                        
+                elif event.type == pygame.KEYDOWN:
+                    if self.key_down_handler:
+                        self.key_down_handler(pygame.key.name(event.key))
+                        
+                elif event.type == pygame.KEYUP:
+                    if self.key_up_handler:
+                        self.key_up_handler(pygame.key.name(event.key))
+                
+                # timers
+                #elif event.type == timer_example:
+                    #t_example()      
+                    
+            # the call to the draw handler
+            self.call_draw_handler()
+            
+            # FPS limit to 60 -- essentially, setting the draw handler timing
+            # it micro pauses so while loop only runs 60 times a second max.
+            clock.tick(self.FPS)
+            
+        pygame.quit()
+        
+class Canvas(object):
+    '''Creates the canvas to draw on.'''
+    def __init__(self,size, color='Black'):
+        #self.Surface = pygame.display.set_mode(size)
+        self.Surface = pygame.Surface(size)
+        self.background_color = pygame.Color(color)
+        
+        self.font_dict = {('serif',16):pygame.font.Font(pygame.font.match_font('timesnewroman'), 16),
+             ('sans-serif',16):pygame.font.Font(pygame.font.match_font('arial'), 16)}
+        
+        
+    def set_background_color(self, color):
+        color = pygame.Color(color) if type(color) == str else color
+        self.background_color = color
+    
+    def set_font_sizes(self, sizes):
+        '''Creates the dictionary of available fonts.'''
+        self.font_dict = dict()
+        for size in sizes:
+            self.font_dict[('serif',size)] = pygame.font.Font(pygame.font.match_font('timesnewroman'), size)
+            self.font_dict[('sans-serif',size)] = pygame.font.Font(pygame.font.match_font('arial'), size)
+         
+    def draw_background(self):
+        self.Surface.fill(self.background_color)
+        
+    def draw_rect(self, pos, size, line_width, line_color, fill_color = None):
+        '''draw a rectangle shape'''
+        Rect = pygame.Rect(pos[0], pos[1], size[0], size[1])
+        
+        if fill_color:
+            fill_color = pygame.Color(fill_color) if type(fill_color) == str else fill_color
+            pygame.draw.rect(self.Surface, fill_color, Rect, 0)
+                
+        line_color = pygame.Color(line_color) if type(line_color) == str else line_color
+        pygame.draw.rect(self.Surface, line_color, Rect, line_width)
+        
+    def draw_polygon(self, point_list, line_width, line_color, fill_color = None):
+        '''draw a shape with any number of sides'''
+        if fill_color:
+            fill_color = pygame.Color(fill_color) if type(fill_color) == str else fill_color
+            pygame.draw.polygon(self.Surface, fill_color, point_list, 0)
+                
+        line_color = pygame.Color(line_color) if type(line_color) == str else line_color
+        pygame.draw.polygon(self.Surface, line_color, point_list, line_width)
+        
+    def draw_circle(self, pos, radius, line_width, line_color, fill_color = None):
+        '''draw a circle around a point'''
+        if fill_color:
+            fill_color = pygame.Color(fill_color) if type(fill_color) == str else fill_color
+            pygame.draw.circle(self.Surface, fill_color, pos, radius, 0)
+                
+        line_color = pygame.Color(line_color) if type(line_color) == str else line_color
+        pygame.draw.circle(self.Surface, line_color, pos, radius, line_width)
+        
+    def draw_ellipse(self, pos, size, line_width, line_color, fill_color = None):
+        '''draw a round shape inside a rectangle'''
+        Rect = pygame.Rect(pos[0], pos[1], size[0], size[1])
+        
+        if fill_color:
+            fill_color = pygame.Color(fill_color) if type(fill_color) == str else fill_color
+            pygame.draw.ellipse(self.Surface, fill_color, Rect, 0)
+                
+        line_color = pygame.Color(line_color) if type(line_color) == str else line_color
+        pygame.draw.ellipse(self.Surface, line_color, Rect, line_width)
+        
+    def draw_arc(self, color, pos, size, start_angle, stop_angle, width=1):
+        '''draw a partial section of an ellipse'''
+        color = pygame.Color(color) if type(color) == str else color
+        Rect = pygame.Rect(pos[0], pos[1], size[0], size[1])
+        pygame.draw.arc(self.Surface, color, Rect, start_angle, stop_angle, width)
+        
+    def draw_line(self, color, start_pos, end_pos, width=1):
+        '''draw a straight line segment'''
+        color = pygame.Color(color) if type(color) == str else color
+        pygame.draw.line(self.Surface, color, start_pos, end_pos, width) 
+        
+    def draw_lines(self, color, closed, pointlist, width=1):
+        '''draw multiple contiguous line segments'''
+        pygame.draw.lines(self.Surface, color, closed, pointlist, width)
+        
+    def draw_aaline(self, color, startpos, endpos, blend=1):
+        '''draw fine antialiased lines'''
+        color = pygame.Color(color) if type(color) == str else color
+        pygame.draw.aaline(self.Surface, color, startpos, endpos, blend)
+        
+    def draw_aalines(self, color, closed, pointlist, blend=1):
+        '''draw a connected sequence of antialiased lines'''
+        color = pygame.Color(color) if type(color) == str else color
+        pygame.draw.aalines(self.Surface, color, closed, pointlist, blend)
+        
+    def draw_text(self, text, pos, font_size, font_color, font_face, align=('left','top')):
+        '''draw text on the canvas'''
+        font_color = pygame.Color(font_color) if type(font_color) == str else font_color
+        font = self.font_dict[(font_face, font_size)]
+        s = font.render(text, True, font_color)
+        size = font.size(text)
+        
+        if align[0] in ALIGNMENTS[0] and align[1] in ALIGNMENTS[1]:
+            pos = (pos[0] - ALIGNMENTS[0].index(align[0])*0.5*size[0],
+                   pos[1] - ALIGNMENTS[1].index(align[1])*0.5*size[1])
+        else:
+            raise('invalid alignment in draw_text')
+        
+        self.Surface.blit(s, pos)
+        
+class ButtonPanel(Canvas):
+    '''Creates a button panel'''
+    def __init__(self, size, color='Black'):
+        super(ButtonPanel, self).__init__(size, color)
+        self.buttons = []
+        self.spacing = 5
+        
+    def add_button(self, text, handler, width, font_height):
+        x_offset = 0
+        y_offset = sum([self.spacing + b.size[1] for b in self.buttons])
+        self.buttons.append(Button(text, handler, (x_offset, y_offset), width, font_height))
+        
+    def draw_buttons(self):
+        for button in self.buttons:
+            button.draw(self)
+            
+    def button_click_handlers(self, click_pos):
+        [button.call_handler() for button in self.buttons if button.button_click_handlers(click_pos)]
+            
+    
+class Button(object):
+    '''Creates a button.'''
+    
+    def __init__(self, text, handler, pos, width, font_height):
+        self.text = text
+        self.handler = handler
+        self.pos = pos
+        self.font_h = font_height
+        self.size = (width, 2*self.font_h)
+            
+    def call_handler(self):
+        if self.handler:
+            self.handler()
+            
+    def draw(self, canvas):
+        canvas.draw_rect(self.pos, self.size, 1, 'black', 'grey')
+        canvas.draw_text(self.text, (self.pos[0]+self.size[0]/2,self.pos[1]+self.size[1]/2), self.font_h, 'black', 'sans-serif', ('center','middle'))
+    
+    def button_click_handlers(self, click_pos):
+        return 0 <= click_pos[0] - self.pos[0] <= self.size[0] and 0 <= click_pos[1] - self.pos[1] <= self.size[1]
+            
+        
+            
+        
+if __name__ == '__main__':
+    
+    
+    def print_event(name, event_info):
+        print name, event_info
+        
+    def draw(canvas):
+        canvas.draw_text('Hello', (200,200), 16, 'white', 'serif')
+    
+    frame = Frame('test', (640, 480))
+    
+    frame.set_key_down_handler(lambda x: print_event('Key down:', x))
+    frame.set_key_up_handler(lambda x: print_event('Key up:', x))
+    frame.set_mouse_left_click_handler(lambda x: print_event('Mouse Left Click:', x))
+    frame.set_mouse_right_click_handler(lambda x: print_event('Mouse Right Click:', x))
+    frame.set_mouse_move_handler(lambda x: print_event('Mouse Move:', x))
+    
+    frame.set_draw_handler(draw)
+    frame.start()#nothing can come after frame.start()
+    
+    
