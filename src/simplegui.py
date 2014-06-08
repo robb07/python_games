@@ -24,22 +24,22 @@ class Frame(object):
     '''
 
 
-    def __init__(self, title, size = (640, 480), button_panel_width = 0, fps = 60):
+    def __init__(self, title, size = (640, 480), control_panel_width = 0, fps = 60):
         '''
         Creates the frame
         '''
         self.running = False
-        self.window = pygame.display.set_mode((size[0]+button_panel_width,size[1]))
+        self.window = pygame.display.set_mode((size[0]+control_panel_width,size[1]))
         self.canvas_size = size
-        self.button_panel_size = (button_panel_width,size[1])
+        self.control_panel_size = (control_panel_width,size[1])
         self.canvas = Canvas(size)
         
-        if button_panel_width != 0:
-            self.button_panel = ButtonPanel(self.button_panel_size,'Grey')
+        if control_panel_width != 0:
+            self.control_panel = ControlPanel(self.control_panel_size,'Grey')
         else:
-            self.button_panel = None
+            self.control_panel = None
         
-        #self.buttons = []
+        #self.controls = []
         
         pygame.display.set_caption(title)
         self.FPS = fps
@@ -92,18 +92,22 @@ class Frame(object):
     
     def set_font_sizes(self, sizes):
         self.canvas.set_font_sizes(sizes)
-        self.button_panel.set_font_sizes(sizes)
+        self.control_panel.set_font_sizes(sizes)
     
     def add_button(self, text, handler, width, font_height):
-        self.button_panel.add_button(text, handler, width, font_height)
-        
-    def button_click_handler(self, click_pos):
+        return self.control_panel.add_button(text, handler, width, font_height)
+    
+    def add_label(self, text, width=None, font_height=None):
+        return self.control_panel.add_label(text, width, font_height)
+            
+    def control_click_handler(self, click_pos):
         pos = (click_pos[0] - self.canvas_size[0], click_pos[1])
-        self.button_panel.button_click_handlers(pos)
+        if 0 <= pos[0] <= self.control_panel_size[0] and 0 <= pos[1] <= self.control_panel_size[1]:
+            self.control_panel.click_handler(pos)
         
     def call_draw_handler(self):
         '''Clears the screen and calls the draw handler'''
-        if self.surface_count or not self.button_panel:
+        if self.surface_count or not self.control_panel:
             self.canvas.draw_background()
             
             if self.draw_handler:
@@ -112,9 +116,9 @@ class Frame(object):
             self.window.blit(self.canvas.Surface,(0,0))
             self.surface_count = 0
         else:
-            self.button_panel.draw_background()
-            self.button_panel.draw_buttons()
-            self.window.blit(self.button_panel.Surface,(self.canvas_size[0],0))
+            self.control_panel.draw_background()
+            self.control_panel.draw_buttons()
+            self.window.blit(self.control_panel.Surface,(self.canvas_size[0],0))
             self.surface_count = 1
         # update the display
         pygame.display.update()
@@ -133,13 +137,14 @@ class Frame(object):
     
                 # input - key and mouse event handlers
                 elif event.type == pygame.MOUSEBUTTONDOWN:
-                    # just respond to left mouse clicks
-                    
                     if pygame.mouse.get_pressed()[0]:
+                        #left clicks
                         if self.mouse_left_click_handler:
                             self.mouse_left_click_handler(pygame.mouse.get_pos())
-                            self.button_click_handler(pygame.mouse.get_pos())
+                        
+                        self.control_click_handler(pygame.mouse.get_pos())
                     elif pygame.mouse.get_pressed()[2]:
+                        #right clicks
                         if self.mouse_right_click_handler:
                             self.mouse_right_click_handler(pygame.mouse.get_pos())
                             
@@ -172,6 +177,7 @@ class Canvas(object):
     '''Creates the canvas to draw on.'''
     def __init__(self,size, color='Black'):
         #self.Surface = pygame.display.set_mode(size)
+        self.size = size
         self.Surface = pygame.Surface(size)
         self.background_color = pygame.Color(color)
         
@@ -195,6 +201,8 @@ class Canvas(object):
         
     def draw_rect(self, pos, size, line_width, line_color, fill_color = None):
         '''draw a rectangle shape'''
+        pos = tuple([int(p) for p in pos])
+        size = tuple([int(s) for s in size])
         Rect = pygame.Rect(pos[0], pos[1], size[0], size[1])
         
         if fill_color:
@@ -215,6 +223,8 @@ class Canvas(object):
         
     def draw_circle(self, pos, radius, line_width, line_color, fill_color = None):
         '''draw a circle around a point'''
+        pos = tuple([int(p) for p in pos])
+        radius = int(radius)
         if fill_color:
             fill_color = pygame.Color(fill_color) if type(fill_color) == str else fill_color
             pygame.draw.circle(self.Surface, fill_color, pos, radius, 0)
@@ -224,6 +234,8 @@ class Canvas(object):
         
     def draw_ellipse(self, pos, size, line_width, line_color, fill_color = None):
         '''draw a round shape inside a rectangle'''
+        pos = tuple([int(p) for p in pos])
+        size = tuple([int(s) for s in size])
         Rect = pygame.Rect(pos[0], pos[1], size[0], size[1])
         
         if fill_color:
@@ -233,33 +245,40 @@ class Canvas(object):
         line_color = pygame.Color(line_color) if type(line_color) == str else line_color
         pygame.draw.ellipse(self.Surface, line_color, Rect, line_width)
         
-    def draw_arc(self, color, pos, size, start_angle, stop_angle, width=1):
+    def draw_arc(self, pos, size, start_angle, stop_angle, width=1, color='White'):
         '''draw a partial section of an ellipse'''
+        pos = tuple([int(p) for p in pos])
+        size = tuple([int(s) for s in size])
         color = pygame.Color(color) if type(color) == str else color
         Rect = pygame.Rect(pos[0], pos[1], size[0], size[1])
         pygame.draw.arc(self.Surface, color, Rect, start_angle, stop_angle, width)
         
-    def draw_line(self, color, start_pos, end_pos, width=1):
+    def draw_line(self, start_pos, end_pos, width=1, color='White'):
         '''draw a straight line segment'''
+        start_pos = tuple([int(p) for p in start_pos])
+        end_pos = tuple([int(p) for p in end_pos])
         color = pygame.Color(color) if type(color) == str else color
         pygame.draw.line(self.Surface, color, start_pos, end_pos, width) 
         
-    def draw_lines(self, color, closed, pointlist, width=1):
+    def draw_lines(self, closed, pointlist, width=1, color='White'):
         '''draw multiple contiguous line segments'''
         pygame.draw.lines(self.Surface, color, closed, pointlist, width)
         
-    def draw_aaline(self, color, startpos, endpos, blend=1):
+    def draw_aaline(self, start_pos, end_pos, blend=1, color='White'):
         '''draw fine antialiased lines'''
+        start_pos = tuple([int(p) for p in start_pos])
+        end_pos = tuple([int(p) for p in end_pos])
         color = pygame.Color(color) if type(color) == str else color
-        pygame.draw.aaline(self.Surface, color, startpos, endpos, blend)
+        pygame.draw.aaline(self.Surface, color, start_pos, end_pos, blend)
         
-    def draw_aalines(self, color, closed, pointlist, blend=1):
+    def draw_aalines(self, closed, pointlist, blend=1, color='White'):
         '''draw a connected sequence of antialiased lines'''
         color = pygame.Color(color) if type(color) == str else color
         pygame.draw.aalines(self.Surface, color, closed, pointlist, blend)
         
-    def draw_text(self, text, pos, font_size, font_color, font_face, align=('left','top')):
+    def draw_text(self, text, pos, font_size, font_color, font_face='sans-serif', align=('left','top')):
         '''draw text on the canvas'''
+        pos = tuple([int(p) for p in pos])
         font_color = pygame.Color(font_color) if type(font_color) == str else font_color
         font = self.font_dict[(font_face, font_size)]
         s = font.render(text, True, font_color)
@@ -273,24 +292,37 @@ class Canvas(object):
         
         self.Surface.blit(s, pos)
         
-class ButtonPanel(Canvas):
+class ControlPanel(Canvas):
     '''Creates a button panel'''
     def __init__(self, size, color='Black'):
-        super(ButtonPanel, self).__init__(size, color)
-        self.buttons = []
+        super(ControlPanel, self).__init__(size, color)
+        self.controls = []
         self.spacing = 5
         
     def add_button(self, text, handler, width, font_height):
-        x_offset = 0
-        y_offset = sum([self.spacing + b.size[1] for b in self.buttons])
-        self.buttons.append(Button(text, handler, (x_offset, y_offset), width, font_height))
+        x_offset = self.size[0]/2 - width/2
+        y_offset = sum([self.spacing + b.size[1] for b in self.controls])
+        button = Button(text, handler, (x_offset, y_offset), width, font_height)
+        self.controls.append(button)
+        return button
+        
+    def add_label(self, text,  width=None, font_height=None):
+        if not width:
+            width = self.size[0]
+        if not font_height:
+            font_height = 20
+        x_offset = self.size[0]/2 - width/2
+        y_offset = sum([self.spacing + b.size[1] for b in self.controls])
+        label = Label(text, (x_offset, y_offset), width, font_height)
+        self.controls.append(label)
+        return label
         
     def draw_buttons(self):
-        for button in self.buttons:
+        for button in self.controls:
             button.draw(self)
             
-    def button_click_handlers(self, click_pos):
-        [button.call_handler() for button in self.buttons if button.button_click_handlers(click_pos)]
+    def click_handler(self, click_pos):
+        [thing.call_handler() for thing in self.controls if type(thing) == Button and thing.click_check(click_pos)]
             
     
 class Button(object):
@@ -302,7 +334,13 @@ class Button(object):
         self.pos = pos
         self.font_h = font_height
         self.size = (width, 2*self.font_h)
-            
+    
+    def set_text(self,text):
+        self.text = text
+        
+    def get_text(self):
+        return self.text
+    
     def call_handler(self):
         if self.handler:
             self.handler()
@@ -311,10 +349,42 @@ class Button(object):
         canvas.draw_rect(self.pos, self.size, 1, 'black', 'grey')
         canvas.draw_text(self.text, (self.pos[0]+self.size[0]/2,self.pos[1]+self.size[1]/2), self.font_h, 'black', 'sans-serif', ('center','middle'))
     
-    def button_click_handlers(self, click_pos):
+    def click_check(self, click_pos):
         return 0 <= click_pos[0] - self.pos[0] <= self.size[0] and 0 <= click_pos[1] - self.pos[1] <= self.size[1]
-            
+       
+class Label(object):
+    '''Creates a button.'''
+    
+    def __init__(self, text, pos, width, font_height):
+        self.text = text
+        self.pos = pos
+        self.font_h = font_height
+        self.size = (width, 2*self.font_h)
+    
+    def set_text(self,text):
+        self.text = text
         
+    def get_text(self):
+        return self.text
+    
+    def draw(self, canvas):
+        canvas.draw_text(self.text, (self.pos[0]+self.size[0]/2,self.pos[1]+self.size[1]/2), self.font_h, 'black', 'sans-serif', ('center','middle'))
+    
+           
+class Sound(object):
+    '''Creates a sound file'''
+    
+    def __init__(self,sound_file):
+        self.sound_file = sound_file
+        
+    def play(self):
+        pass
+    
+    def pause(self):
+        pass
+    
+    def stop(self):
+        pass
             
         
 if __name__ == '__main__':
