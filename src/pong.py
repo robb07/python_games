@@ -17,7 +17,7 @@ import math
 WIDTH = 600
 HEIGHT = 400
 BUTTON_W = 200       
-BUTTON_FONT_H = 20#changing this messes up the default fonts
+BUTTON_FONT_H = 16
 SCORE_FONT_H = 40
 
 BALL_RADIUS = 10
@@ -372,6 +372,7 @@ if __name__ == '__main__':
     frame.set_key_down_handler(keydown)
     frame.set_key_up_handler(keyup)
     
+    frame.add_label(" ")
     frame.add_button("Restart",new_game, 0.9*BUTTON_W, BUTTON_FONT_H)
     frame.add_button("Pause",pause_game, 0.9*BUTTON_W, BUTTON_FONT_H)
     
@@ -389,8 +390,6 @@ if __name__ == '__main__':
     
     #frame.add_label(" ")
     frame.add_button("Mute",mute, 0.9*BUTTON_W, BUTTON_FONT_H)
-    
-    frame.set_font_sizes([BUTTON_FONT_H,SCORE_FONT_H])
     
     sound_beeep = simplegui.Sound('https://dl.dropboxusercontent.com/u/22969407/sounds_ping_pong_8bit/ping_pong_8bit_beeep.ogg')
     sound_peeeeeep = simplegui.Sound('https://dl.dropboxusercontent.com/u/22969407/sounds_ping_pong_8bit/ping_pong_8bit_peeeeeep.ogg')

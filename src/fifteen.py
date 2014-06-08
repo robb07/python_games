@@ -167,7 +167,6 @@ if __name__ == '__main__':
     frame.add_button("Shuffle tiles", shuffle_button, BUTTON_W, BUTTON_FONT_H)
     frame.set_key_up_handler(key_up)
     frame.set_mouse_left_click_handler(click)
-    frame.set_font_sizes([FONT_H,BUTTON_FONT_H])
     
     new_board()
     frame.start()

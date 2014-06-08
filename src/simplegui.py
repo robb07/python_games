@@ -18,6 +18,17 @@ pygame.init()
 
 ALIGNMENTS = (('left','center','right'),('top','middle','bottom'))
 
+FONT_FACE_DICT = {'serif':pygame.font.match_font('timesnewroman'),
+                  'sans-serif':pygame.font.match_font('arial')}
+FONT_DICT = {}
+
+def get_font(font_face, font_size):
+    if not FONT_FACE_DICT.has_key(font_face):
+        raise('Not a valid font face: '+font_face+'\nShould be in: ' + FONT_FACE_DICT.keys())
+    if not FONT_DICT.has_key((font_face,font_size)):
+        FONT_DICT[(font_face,font_size)] = pygame.font.Font(FONT_FACE_DICT[font_face], font_size)
+    return FONT_DICT[(font_face,font_size)]
+    
 class Frame(object):
     '''
     Creates a window for drawing and event handling.
@@ -89,11 +100,7 @@ class Frame(object):
     def set_key_up_handler(self, key_up_handler):
         '''Sets the key up handler'''
         self.key_up_handler = key_up_handler
-    
-    def set_font_sizes(self, sizes):
-        self.canvas.set_font_sizes(sizes)
-        self.control_panel.set_font_sizes(sizes)
-    
+        
     def add_button(self, text, handler, width, font_height):
         return self.control_panel.add_button(text, handler, width, font_height)
     
@@ -175,26 +182,16 @@ class Frame(object):
         
 class Canvas(object):
     '''Creates the canvas to draw on.'''
-    def __init__(self,size, color='Black'):
+    def __init__(self,size, color='Black', default_font_h=16):
         #self.Surface = pygame.display.set_mode(size)
         self.size = size
         self.Surface = pygame.Surface(size)
         self.background_color = pygame.Color(color)
-        
-        self.font_dict = {('serif',16):pygame.font.Font(pygame.font.match_font('timesnewroman'), 16),
-             ('sans-serif',16):pygame.font.Font(pygame.font.match_font('arial'), 16)}
-        
-        
+        self.default_font_h = default_font_h
+                
     def set_background_color(self, color):
         color = pygame.Color(color) if type(color) == str else color
         self.background_color = color
-    
-    def set_font_sizes(self, sizes):
-        '''Creates the dictionary of available fonts.'''
-        self.font_dict = dict()
-        for size in sizes:
-            self.font_dict[('serif',size)] = pygame.font.Font(pygame.font.match_font('timesnewroman'), size)
-            self.font_dict[('sans-serif',size)] = pygame.font.Font(pygame.font.match_font('arial'), size)
          
     def draw_background(self):
         self.Surface.fill(self.background_color)
@@ -280,7 +277,7 @@ class Canvas(object):
         '''draw text on the canvas'''
         pos = tuple([int(p) for p in pos])
         font_color = pygame.Color(font_color) if type(font_color) == str else font_color
-        font = self.font_dict[(font_face, font_size)]
+        font = get_font(font_face, font_size)
         s = font.render(text, True, font_color)
         size = font.size(text)
         
@@ -294,10 +291,11 @@ class Canvas(object):
         
 class ControlPanel(Canvas):
     '''Creates a button panel'''
-    def __init__(self, size, color='Black'):
-        super(ControlPanel, self).__init__(size, color)
+    def __init__(self, size, color='Black', default_font_h=16):
+        super(ControlPanel, self).__init__(size, color, default_font_h)
         self.controls = []
         self.spacing = 5
+        
         
     def add_button(self, text, handler, width, font_height):
         x_offset = self.size[0]/2 - width/2
@@ -310,7 +308,7 @@ class ControlPanel(Canvas):
         if not width:
             width = self.size[0]
         if not font_height:
-            font_height = 20
+            font_height = self.default_font_h
         x_offset = self.size[0]/2 - width/2
         y_offset = sum([self.spacing + b.size[1] for b in self.controls])
         label = Label(text, (x_offset, y_offset), width, font_height)
