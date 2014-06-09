@@ -23,6 +23,7 @@ FONT_FACE_DICT = {'serif':pygame.font.match_font('timesnewroman'),
 FONT_DICT = {}
 
 def get_font(font_face, font_size):
+    '''Gets a font object'''
     if not FONT_FACE_DICT.has_key(font_face):
         raise('Not a valid font face: '+font_face+'\nShould be in: ' + FONT_FACE_DICT.keys())
     if not FONT_DICT.has_key((font_face,font_size)):
@@ -102,12 +103,15 @@ class Frame(object):
         self.key_up_handler = key_up_handler
         
     def add_button(self, text, handler, width, font_height):
+        '''Adds a button to the control panel'''
         return self.control_panel.add_button(text, handler, width, font_height)
     
     def add_label(self, text, width=None, font_height=None):
+        '''Adds a label to the control panel'''
         return self.control_panel.add_label(text, width, font_height)
             
     def control_click_handler(self, click_pos):
+        '''Calls the control panel click handler'''
         pos = (click_pos[0] - self.canvas_size[0], click_pos[1])
         if 0 <= pos[0] <= self.control_panel_size[0] and 0 <= pos[1] <= self.control_panel_size[1]:
             self.control_panel.click_handler(pos)
@@ -124,7 +128,7 @@ class Frame(object):
             self.surface_count = 0
         else:
             self.control_panel.draw_background()
-            self.control_panel.draw_buttons()
+            self.control_panel.draw_controls()
             self.window.blit(self.control_panel.Surface,(self.canvas_size[0],0))
             self.surface_count = 1
         # update the display
@@ -290,14 +294,17 @@ class Canvas(object):
         self.Surface.blit(s, pos)
         
 class ControlPanel(Canvas):
-    '''Creates a button panel'''
+    '''Creates a conrol panel'''
+    
     def __init__(self, size, color='Black', default_font_h=16):
+        '''Initializes the control panel'''
         super(ControlPanel, self).__init__(size, color, default_font_h)
         self.controls = []
         self.spacing = 5
         
         
     def add_button(self, text, handler, width, font_height):
+        '''Adds a button to the control panel'''
         x_offset = self.size[0]/2 - width/2
         y_offset = sum([self.spacing + b.size[1] for b in self.controls])
         button = Button(text, handler, (x_offset, y_offset), width, font_height)
@@ -305,6 +312,7 @@ class ControlPanel(Canvas):
         return button
         
     def add_label(self, text,  width=None, font_height=None):
+        '''Adds a label to the control panel'''
         if not width:
             width = self.size[0]
         if not font_height:
@@ -315,18 +323,21 @@ class ControlPanel(Canvas):
         self.controls.append(label)
         return label
         
-    def draw_buttons(self):
-        for button in self.controls:
-            button.draw(self)
+    def draw_controls(self):
+        '''Draws the controls'''
+        for control in self.controls:
+            control.draw(self)
             
     def click_handler(self, click_pos):
-        [thing.call_handler() for thing in self.controls if type(thing) == Button and thing.click_check(click_pos)]
+        '''Calls the control that was clicked on by a position'''
+        [control.call_handler() for control in self.controls if type(control) == Button and control.click_check(click_pos)]
             
     
 class Button(object):
     '''Creates a button.'''
     
     def __init__(self, text, handler, pos, width, font_height):
+        '''Initializes the button'''
         self.text = text
         self.handler = handler
         self.pos = pos
@@ -334,38 +345,47 @@ class Button(object):
         self.size = (width, 2*self.font_h)
     
     def set_text(self,text):
+        '''Sets the text of the button'''
         self.text = text
         
     def get_text(self):
+        '''Gets the text of the button'''
         return self.text
     
     def call_handler(self):
+        '''Calls the button's event handler'''
         if self.handler:
             self.handler()
             
     def draw(self, canvas):
+        '''Draws the button'''
         canvas.draw_rect(self.pos, self.size, 1, 'black', 'grey')
         canvas.draw_text(self.text, (self.pos[0]+self.size[0]/2,self.pos[1]+self.size[1]/2), self.font_h, 'black', 'sans-serif', ('center','middle'))
     
     def click_check(self, click_pos):
+        '''Checks to see if the button was clicked on by a position'''
         return 0 <= click_pos[0] - self.pos[0] <= self.size[0] and 0 <= click_pos[1] - self.pos[1] <= self.size[1]
        
 class Label(object):
-    '''Creates a button.'''
+    '''Creates a Label.'''
     
     def __init__(self, text, pos, width, font_height):
+        '''Initializes the label'''
         self.text = text
         self.pos = pos
         self.font_h = font_height
         self.size = (width, 2*self.font_h)
     
     def set_text(self,text):
+        '''Sets the label's text'''
         self.text = text
         
     def get_text(self):
+        '''Gets the label's text'''
         return self.text
     
     def draw(self, canvas):
+        '''Draws the label'''
         canvas.draw_text(self.text, (self.pos[0]+self.size[0]/2,self.pos[1]+self.size[1]/2), self.font_h, 'black', 'sans-serif', ('center','middle'))
     
            

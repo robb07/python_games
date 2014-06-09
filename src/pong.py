@@ -34,15 +34,12 @@ PADDLE_VEL = 600
 
 # initialize global variables for structure only
 game_paused = False
-plyr1_human = True
-plyr2_human = True
 difficulty_mode = "Easy"
-dt_ahead = 0
-computer_paddle_factor = 1.1
-speedup_factor = 1.1
+DT_AHEAD = 0
+COMPUTER_PADDLE_FACTOR = 1.1
+SPEEDUP_FACTOR = 1.1
 
 mute_off = True
-
 
 paddles = []
 
@@ -63,16 +60,17 @@ class Paddle(object):
         self.human = human
     
     def key_press(self, key, state):
-        '''Change the control state for a key'''
+        '''Changes the control state for a key'''
         if self.key_controls.has_key(key):
             self.control_states[self.key_controls[key]] = state
     
     def set_human(self,human):
+        '''Sets the player to human or computer'''
         self.human = human
         self.paddle_vel = 0
         
     def get_vel(self):
-        '''Get the paddle velocity'''
+        '''Gets the paddle velocity'''
         if self.control_states['up']:
             return -self.paddle_speed
         elif self.control_states['down']:
@@ -81,26 +79,30 @@ class Paddle(object):
             return 0
     
     def get_computer_move(self):
-        '''Calculate the computer player's move'''
-        if ball.pos[0] > self.pos[0]:
-            #return computer1_move()
-            ball_pos_est = [ball.pos[0] + dt_ahead*DT*ball.vel[0], ball.pos[1] + dt_ahead*DT*ball.vel[1]]
-            
-            if ball.vel[0] <0:
-                return computer_move(self.pos,self.paddle_vel,ball_pos_est)
-            else:
-                return 0
+        '''Calculates the computer player's move'''
+        if ball.pos[0] - self.pos[0] > 0 and ball.vel[0] < 0:
+            ball_pos_est = [ball.pos[0] + DT_AHEAD*DT*ball.vel[0], ball.pos[1] + DT_AHEAD*DT*ball.vel[1]]
+        elif ball.pos[0] - self.pos[0] < 0 and ball.vel[0] > 0:
+            ball_pos_est = [WIDTH - (ball.pos[0] + DT_AHEAD*DT*ball.vel[0]), ball.pos[1] + DT_AHEAD*DT*ball.vel[1]]
         else:
-            #return computer2_move()
-            ball_pos_est = [WIDTH - (ball.pos[0] + dt_ahead*DT*ball.vel[0]), ball.pos[1] + dt_ahead*DT*ball.vel[1]]
-            if ball.vel[0] > 0:
-                return computer_move(self.pos,self.paddle_vel,ball_pos_est)
-            else:
-                return 0
+            return 0
         
+        if ball_pos_est[0] > random.randrange(WIDTH/4,3*WIDTH/4):
+            return self.paddle_vel
+        
+        dist = ball_pos_est[1] - (self.pos[1] + HALF_PAD_HEIGHT)
+        direction = 1 if dist > 0 else -1
+        if math.fabs(dist) < COMPUTER_PADDLE_FACTOR * HALF_PAD_HEIGHT:
+            return direction*self.paddle_speed if random.randrange(0,100) >= 90 else 0
+        elif math.fabs(dist) < PAD_HEIGHT:
+            return direction*self.paddle_speed if random.randrange(0,100) >= 40 else 0
+        elif random.randrange(HALF_PAD_HEIGHT,HEIGHT) >= math.fabs(dist):
+            return direction*self.paddle_speed
+        else:
+            return self.paddle_vel
         
     def update(self):
-        '''Update the paddle position'''
+        '''Updates the paddle position'''
         if not game_paused:
             if self.human:
                 self.paddle_vel = self.get_vel()
@@ -116,7 +118,7 @@ class Paddle(object):
                 
         
     def draw(self, canvas):
-        '''Draw the paddle and the score'''
+        '''Draws the paddle and the score'''
         # draw paddle
         canvas.draw_rect(self.pos,self.size,1,"White","white")
         # draw score
@@ -124,8 +126,8 @@ class Paddle(object):
         
     def collide(self):
         '''
-        Check to see if ball collided with paddle
-        Bounce the ball or spawn a ball and mark score
+        Checks to see if ball collided with paddle
+        Bounces the ball or spawn a ball and mark score
         '''
         ball_to_paddle = self.get_ball_to_paddle(ball.pos)
         if ((self.pos[0] + 0.5*self.size[0]) - 0.5*WIDTH) * ball.vel[0] >= 0: 
@@ -134,7 +136,7 @@ class Paddle(object):
                 # ball is coming at the paddle
                 if abs(ball_to_paddle[1]) <= 0.5*self.size[1]:
                     #bounce
-                    ball.bounce(HORIZONTAL, speedup_factor)
+                    ball.bounce(HORIZONTAL, SPEEDUP_FACTOR)
                 else:
                     spawn_ball(self.pos[0] < 0.5*WIDTH)
                     mark_score(self)
@@ -146,6 +148,7 @@ class Paddle(object):
         #    spawn_ball(ball.pos[0] < 0.5*WIDTH)
     
     def get_ball_to_paddle(self, ball_pos):
+        '''Distance from the ball to the paddle in (x,y)'''
         pad_center = (self.pos[0] + 0.5*self.size[0], self.pos[1] + 0.5*self.size[1])
         ball_to_paddle = (pad_center[0] - ball_pos[0], pad_center[1] - ball_pos[1])
         return ball_to_paddle
@@ -156,29 +159,30 @@ class Paddle(object):
             
             
     def __str__(self):
+        '''Converts the paddle to a string'''
         return self.name + ': ' + str(self.key_controls)
         
 class Ball(object):
     '''Creates the ball'''
     
     def __init__(self, pos, radius, vel):
-        '''Initialize the ball'''
+        '''Initializes the ball'''
         self.pos = pos
         self.radius = radius
         self.vel = vel
         
     def update(self):
-        '''Update the ball's position'''
+        '''Updates the ball's position'''
         if not game_paused:
             self.pos[0] += DT * self.vel[0]
             self.pos[1] += DT * self.vel[1]
     
     def draw(self, canvas):
-        '''Draw the ball on the canvas'''
+        '''Draws the ball on the canvas'''
         canvas.draw_circle(self.pos,self.radius,1,"White","White")
     
     def bounce(self,horizontal,speedup=1):
-        '''Bounce the ball'''
+        '''Bounces the ball'''
         if horizontal:
             self.vel[0] *= -speedup
             self.vel[1] *= speedup
@@ -187,7 +191,7 @@ class Ball(object):
             self.vel[1] *= -speedup
     
     def collide_top_and_bottom(self):
-        """ Bounce the ball off the ceiling and floor. """
+        """Bounces the ball off the ceiling and floor"""
         if self.pos[1] - self.radius < 0 and self.vel[1] < 0:
             #ceiling
             if mute_off: sound_plop.play()
@@ -218,8 +222,6 @@ def spawn_ball(direction):
     
     ball = Ball(ball_pos, BALL_RADIUS, ball_vel)
 
-
-
 def mark_score(scored_on_paddle):
     '''Marks the score'''
     [paddle.increment_score() for paddle in paddles if paddle != scored_on_paddle]
@@ -227,74 +229,19 @@ def mark_score(scored_on_paddle):
 # computer player helper functions
 def set_difficulty(mode):
     """ Sets the computer's difficulty mode. """
-    global difficulty_mode, dt_ahead, computer_paddle_factor
+    global difficulty_mode, DT_AHEAD, COMPUTER_PADDLE_FACTOR
     difficulty_mode = mode
     if difficulty_mode is "Medium":
-        dt_ahead = 2
-        computer_paddle_factor = 1
+        DT_AHEAD = 2
+        COMPUTER_PADDLE_FACTOR = 1
     elif difficulty_mode is "Difficult":
-        dt_ahead = 5
-        computer_paddle_factor = 0.75
+        DT_AHEAD = 5
+        COMPUTER_PADDLE_FACTOR = 0.75
     else:
-        dt_ahead = 0
-        computer_paddle_factor = 1.1
+        DT_AHEAD = 0
+        COMPUTER_PADDLE_FACTOR = 1.1
 
-def computer_move(paddle_pos, paddle_vel, ball_pos_est):
-    """ Computes a new paddle velocity given the ball's position for a computer player. """
-    if ball_pos_est[0] > random.randrange(WIDTH/4,3*WIDTH/4):
-        return paddle_vel
-    
-    dist = ball_pos_est[1] - (paddle_pos[1] + HALF_PAD_HEIGHT)
-    
-    if math.fabs(dist) < computer_paddle_factor * HALF_PAD_HEIGHT:
-        if random.randrange(0,100) >= 90:
-            if dist > 0:
-                paddle_vel = PADDLE_VEL
-            else:
-                paddle_vel = -PADDLE_VEL
-        else:
-            paddle_vel = 0
-    elif math.fabs(dist) < PAD_HEIGHT:
-        if random.randrange(0,100) >= 40:
-            if dist > 0:
-                paddle_vel = PADDLE_VEL
-            else:
-                paddle_vel = -PADDLE_VEL
-        else:
-            paddle_vel = 0
-    elif random.randrange(HALF_PAD_HEIGHT,HEIGHT) >= math.fabs(dist):
-        if dist > 0:
-            paddle_vel = PADDLE_VEL
-        else:
-            paddle_vel = -PADDLE_VEL
-    #else:
-    #    paddle_vel = 0
-        
-    return paddle_vel
 
-# def computer1_move():
-#     """ Controls paddle1 for the computer. """ 
-#     #global paddle1_vel
-#     paddle1_pos = paddles[0].pos
-#     paddle1_vel = paddles[0].paddle_vel
-#     ball_pos_est = [ball.pos[0] + dt_ahead*DT*ball.vel[0], ball.pos[1] + dt_ahead*DT*ball.vel[1]]
-#     if ball.vel[0] < 0:
-#         paddle1_vel = computer_move(paddle1_pos,paddle1_vel,ball_pos_est)
-#     else:
-#         paddle1_vel = 0
-#     return paddle1_vel
-# 
-# def computer2_move():
-#     """ Controls paddle2 for the computer. """
-#     #global paddle2_vel
-#     paddle2_pos = paddles[1].pos
-#     paddle2_vel = paddles[1].paddle_vel
-#     ball_pos_est = [WIDTH - (ball.pos[0] + dt_ahead*DT*ball.vel[0]), ball.pos[1] + dt_ahead*DT*ball.vel[1]]
-#     if ball.vel[0] > 0:
-#         paddle2_vel = computer_move(paddle2_pos,paddle2_vel,ball_pos_est)
-#     else:
-#         paddle2_vel = 0
-#     return paddle2_vel
 
 # define event handlers
 def new_game():
@@ -322,10 +269,8 @@ def draw(c):
     c.draw_line([PAD_WIDTH, 0],[PAD_WIDTH, HEIGHT], 1, "White")
     c.draw_line([WIDTH - PAD_WIDTH, 0],[WIDTH - PAD_WIDTH, HEIGHT], 1, "White")
         
-    # update ball
+    # update, draw, collide the ball
     ball.update()
-    
-    # draw ball
     ball.draw(c)
     ball.collide_top_and_bottom()
 
@@ -385,6 +330,7 @@ def mute():
     mute_off = not mute_off
 
 def setup():
+    '''Setup the frame and buttons'''
     global frame, plyr1_button, plyr2_button, difficulty_button
     global sound_beeep, sound_peeeeeep, sound_plop
     # create frame
