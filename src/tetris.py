@@ -250,12 +250,6 @@ def key_down(key):
 
 def key_up(key):
     '''Handles the key up events'''
-#     if key == 'left':
-#         current_tetroid.move_left()
-#     elif key == 'right':
-#         current_tetroid.move_right()
-#     elif key == 'down':
-#         current_tetroid.move_down()
     if control_state.has_key(key):
         control_state[key] = False
     elif key == 'a':
