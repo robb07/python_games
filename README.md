@@ -12,3 +12,4 @@ Here are the games in the repository:
 
 1. Fifteen Tile Puzzle
 2. Pong
+3. Tetris
