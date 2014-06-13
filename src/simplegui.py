@@ -41,7 +41,7 @@ class Frame(object):
         Creates the frame
         '''
         self.running = False
-        self.window = pygame.display.set_mode((size[0]+control_panel_width,size[1]))
+        self.screen = pygame.display.set_mode((size[0]+control_panel_width,size[1]))
         self.canvas_size = size
         self.control_panel_size = (control_panel_width,size[1])
         self.canvas = Canvas(size)
@@ -120,17 +120,20 @@ class Frame(object):
         '''Clears the screen and calls the draw handler'''
         if self.surface_count or not self.control_panel:
             self.canvas.draw_background()
-            
+             
             if self.draw_handler:
                 self.draw_handler(self.canvas)
+             
+            self.screen.blit(self.canvas.Surface,(0,0))
             
-            self.window.blit(self.canvas.Surface,(0,0))
             self.surface_count = 0
         else:
             self.control_panel.draw_background()
             self.control_panel.draw_controls()
-            self.window.blit(self.control_panel.Surface,(self.canvas_size[0],0))
+            self.screen.blit(self.control_panel.Surface,(self.canvas_size[0],0))
             self.surface_count = 1
+         
+        
         # update the display
         pygame.display.update()
             
@@ -293,6 +296,12 @@ class Canvas(object):
         
         self.Surface.blit(s, pos)
         
+    def draw_image(self, image, pos, angle=0):
+        '''draws an image on the canvas'''
+        pos = tuple([int(p) for p in pos])
+        rot_img = pygame.transform.rotate(image.img, angle)
+        self.Surface.blit(rot_img, pos)
+        
 class ControlPanel(Canvas):
     '''Creates a conrol panel'''
     
@@ -390,29 +399,58 @@ class Label(object):
     
            
 class Sound(object):
-    '''Creates a sound file'''
+    '''Creates a sound file, currently placeholder'''
     
     def __init__(self,sound_file):
+        '''Constructor'''
         self.sound_file = sound_file
         
     def play(self):
+        '''Plays the sound'''
         pass
     
     def pause(self):
+        '''Pauses the sound'''
         pass
     
     def stop(self):
+        '''Stops the sound'''
         pass
             
+class Image_Info(object):
+    '''Image information for an image'''
+    def __init__(self, img_file, size):
+        '''Constructor'''
+        self.img_file = img_file
+        self.size = size
+        
+class Image(object):
+    '''Loads an image into the game'''
+    def __init__(self, img_info):
+        '''Constructor'''
+        self.img_info = img_info
+        self.img = pygame.image.load(img_info.img_file).convert_alpha()
+        
+    def set_size(self, size):
+        '''Set the image size'''
+        self.img_info.size = size
+    
+    def get_size(self):
+        '''Get the image size'''
+        return self.img_info.size
+        
         
 if __name__ == '__main__':
+    global image1
     
-    
+    image_info1 = Image_Info('../lib/images/medium_gear.png', (400,400)) 
     def print_event(name, event_info):
         print name, event_info
         
     def draw(canvas):
         canvas.draw_text('Hello', (200,200), 16, 'white', 'serif')
+        canvas.draw_image(image1,(300,0))
+        
     
     frame = Frame('test', (640, 480))
     
@@ -421,6 +459,7 @@ if __name__ == '__main__':
     frame.set_mouse_left_click_handler(lambda x: print_event('Mouse Left Click:', x))
     frame.set_mouse_right_click_handler(lambda x: print_event('Mouse Right Click:', x))
     frame.set_mouse_move_handler(lambda x: print_event('Mouse Move:', x))
+    image1 = Image(image_info1)
     
     frame.set_draw_handler(draw)
     frame.start()#nothing can come after frame.start()

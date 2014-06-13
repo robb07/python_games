@@ -24,6 +24,16 @@ move_count = 0
 snake = None
 food = None
 
+image_infos = dict([('head',simplegui.Image_Info('../lib/images/snake_head.png',(UNIT,UNIT))),
+                    ('neck',simplegui.Image_Info('../lib/images/snake_neck.png',(UNIT,UNIT))),
+                    ('straight',simplegui.Image_Info('../lib/images/snake_body_straight.png',(UNIT,UNIT))),
+                    ('left',simplegui.Image_Info('../lib/images/snake_body_left.png',(UNIT,UNIT))),
+                    ('right',simplegui.Image_Info('../lib/images/snake_body_right.png',(UNIT,UNIT))),
+                    ('tail',simplegui.Image_Info('../lib/images/snake_tail.png',(UNIT,UNIT))),
+                    ('food',simplegui.Image_Info('../lib/images/snake_food.png',(UNIT,UNIT)))])
+images = dict([])
+
+
 def draw_food(the_food,canvas):
     '''Draws the food as a circle'''
     canvas.draw_circle(the_food.get_pos(),the_food.get_size()[0]/2,the_food.line_width,the_food.line_color,the_food.color)
@@ -61,18 +71,27 @@ class Snake(object):
     
     def __init__(self,start_pos, vel = [UNIT, 0], unit_size = UNIT, color = 'Gold'):
         '''Constructor'''
-        self.head = sprite.Sprite(start_pos, vel, 0, (unit_size,unit_size), color, draw_method=draw_head)
+        self.head = sprite.Sprite(start_pos, vel, 0, (unit_size,unit_size), color, draw_method=draw_head, image=images['head'])
+        self.neck = sprite.Sprite(start_pos, vel, self.head.get_rot(), (unit_size,unit_size), color, image=images['neck'])
         self.body = []
         self.tail = None
         self.size = (unit_size,unit_size)
         self.color = color
         self.controls = dict([('left',1),('right',-1)])
+        
     
     def update(self):
         '''Update the snakes position, try to eat food, and grow'''
-        new_seg = sprite.Sprite(self.head.get_pos(),[0,0],self.head.get_rot(),self.size,self.color)
+        new_seg = sprite.Sprite(self.head.get_pos(),[0,0],self.head.get_rot(),self.size,self.color,image=images['straight'])
         
         self.head.update((WIDTH,HEIGHT))
+        if self.neck.rot != self.head.get_rot():
+            if (self.head.get_rot() - self.neck.rot) % 4 == 1:
+                new_seg.image = images['left']
+            else:
+                new_seg.image = images['right']
+            self.neck.set_rot(self.head.get_rot())
+        self.neck.set_pos(self.head.get_pos())
         if self.eat_food():
             self.body.append(new_seg)
         else:
@@ -85,13 +104,17 @@ class Snake(object):
         if self.tail is None and len(self.body) > 0:
             self.tail = self.body.pop(0)
             self.tail.draw_method = draw_tail
+            #self.tail.image = None
+            self.tail.image = images['tail']
         
     def draw(self, canvas):
         '''Draws the snake on the canvas'''
-        for segment in self.body:
-            segment.draw(canvas)
         if self.tail:
             self.tail.draw(canvas)
+            self.neck.draw(canvas)
+        for segment in self.body:
+            segment.draw(canvas)
+        
         self.head.draw(canvas)
             
     def eat_food(self):
@@ -137,7 +160,7 @@ def new_food():
     food_pos = rand_pos()
     while snake.is_on(food_pos):
         food_pos = rand_pos()
-    return sprite.Sprite(food_pos,[0,0],0,[UNIT,UNIT],FOOD_COLOR,line_color=FOOD_COLOR,draw_method=draw_food)
+    return sprite.Sprite(food_pos,[0,0],0,[UNIT,UNIT],FOOD_COLOR,line_color=FOOD_COLOR,draw_method=draw_food,image=images['food'])
 
 def new_game():
     '''Create a new game'''
@@ -191,7 +214,7 @@ def draw(canvas):
 
 def setup():
     '''Setup the frame and controls'''
-    global frame
+    global frame, images
     
     frame = simplegui.Frame('Snake',(WIDTH,HEIGHT))
     
@@ -201,6 +224,8 @@ def setup():
     frame.set_key_down_handler(key_down)
     frame.set_key_up_handler(key_up)
     frame.set_mouse_left_click_handler(mouse_click)
+    
+    images = dict([(key, simplegui.Image(image_info)) for key, image_info in image_infos.iteritems()])
     
 if __name__ == '__main__':
     setup()

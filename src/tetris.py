@@ -256,9 +256,9 @@ def key_up(key):
         current_tetroid.rotate(-1)
     elif key == 's':
         current_tetroid.rotate(+1)
-    elif key == 'p':
+    elif key == 'space':
         pause()
-    elif key == 'n':
+    elif key == 'return':
         new_game()
     
 
@@ -279,8 +279,8 @@ def setup():
     next_label = frame.add_label('Next: ?')
     score_label = frame.add_label('Score: 0')
     frame.add_label('')
-    frame.add_label('Pause: p')
-    frame.add_label('New Game: n')
+    frame.add_label('Pause: space')
+    frame.add_label('New Game: return')
     frame.add_label('Rotate: a,s')
     frame.add_label('Move: arrows')
     

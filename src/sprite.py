@@ -12,7 +12,7 @@ class Sprite(object):
     '''
 
 
-    def __init__(self, pos, vel, rot, size, color='White', line_color='Black', line_width=1, img=None, draw_method=None):
+    def __init__(self, pos, vel, rot, size, color='White', line_color='Black', line_width=1, image=None, draw_method=None):
         '''
         Constructor
         '''
@@ -23,7 +23,7 @@ class Sprite(object):
         self.color = color
         self.line_color = line_color
         self.line_width = line_width
-        self.img = img
+        self.image = image
         self.draw_method = draw_method
         
     def set_pos(self, pos):
@@ -73,15 +73,8 @@ class Sprite(object):
         '''Gets the size of the sprite'''
         return self.size
     
-    def set_img(self, img):
-        '''Sets the image of the sprite'''
-        self.img = img
-        
-    def get_img(self):
-        '''Gets the image of the sprite'''
-        return self.img
-    
     def update(self, world_size=None):
+        '''Updates the sprite's position'''
         self.pos[0] += self.vel[0]
         self.pos[1] += self.vel[1]
         if world_size:
@@ -89,11 +82,12 @@ class Sprite(object):
             self.pos[1] %= world_size[1]
         
     def draw(self, canvas, default=False):
-        if self.img and not default:
+        '''Draws the sprite'''
+        if self.image and not default:
             #place holder for drawing the sprite's image
-            pass
+            canvas.draw_image(self.image, [self.pos[0]-0.5*self.image.get_size()[0],self.pos[1]-0.5*self.image.get_size()[1]], self.rot*90)
         elif self.draw_method and not default:
-            self.draw_method(self,canvas)
+            self.draw_method(self, canvas)
         else:
             #default is to draw a rectangle centered at pos
             canvas.draw_rect([self.pos[0]-0.5*self.size[0],self.pos[1]-0.5*self.size[1]], self.size, self.line_width, self.line_color, self.color)
