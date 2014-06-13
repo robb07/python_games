@@ -14,12 +14,12 @@ import random
 WIDTH = 600
 HEIGHT = 400
 UNIT = 40
-MOVE_COUNT = 40
+MOVE_COUNT = 30
 BACKGROUND_COLOR = 'SteelBlue'
 FOOD_COLOR = 'White'
 
 game_over = False
-game_paused = True
+game_paused = False
 move_count = 0
 snake = None
 food = None
@@ -42,7 +42,17 @@ def draw_head(head, canvas):
     
 def draw_tail(tail, canvas):
     '''Draws the tail'''
-    tail.draw(canvas,default=True)
+    #tail.draw(canvas,default=True)
+    offset = [0.5*t for t in tail.get_size()]
+    rot_mat = tail.get_rot_mat()
+    r_offset1 = [rot_mat[0][0]*offset[0]+rot_mat[0][1]*offset[1],rot_mat[1][0]*offset[0]+rot_mat[1][1]*offset[1]]
+    r_offset2 = [rot_mat[0][0]*offset[0]+rot_mat[0][1]*-1*offset[1],rot_mat[1][0]*offset[0]+rot_mat[1][1]*-1*offset[1]]
+    r_offset3 = [rot_mat[0][0]*-1*offset[0]+rot_mat[0][1]*0*offset[1],rot_mat[1][0]*-1*offset[0]+rot_mat[1][1]*0*offset[1]]
+    tri_pts = [[tail.get_pos()[0]+r_offset1[0], tail.get_pos()[1]+r_offset1[1]],
+               [tail.get_pos()[0]+r_offset2[0], tail.get_pos()[1]+r_offset2[1]],
+               [tail.get_pos()[0]+r_offset3[0], tail.get_pos()[1]+r_offset3[1]]]
+    canvas.draw_polygon(tri_pts, tail.line_width, tail.line_color, tail.color)
+    
     
 class Snake(object):
     '''
