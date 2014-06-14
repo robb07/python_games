@@ -11,7 +11,6 @@ class Sprite(object):
     Sprite object for drawing and moving around the game canvas
     '''
 
-
     def __init__(self, pos, vel, rot, size, color='White', line_color='Black', line_width=1, image=None, draw_method=None):
         '''
         Constructor

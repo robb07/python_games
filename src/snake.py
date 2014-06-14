@@ -11,6 +11,10 @@ import simplegui
 import sprite
 import random
 
+#SCREEN_SHOT_FILE = None
+SCREEN_SHOT_FILE = "E:/Documents/projects/python_programs/30 days/snake/snake_screen_shot"
+AUTO_SCREEN_SHOT = False
+
 WIDTH = 600
 HEIGHT = 400
 UNIT = 40
@@ -202,8 +206,8 @@ def draw(canvas):
     snake.draw(canvas)
         
     if not game_over:
-        move_count += 1
-        if not game_paused and move_count % MOVE_COUNT == 0:
+        move_count = (move_count + 1) % MOVE_COUNT
+        if not game_paused and move_count == 0:
             snake.update()
             if snake.check_collision():
                 game_over = True
@@ -211,6 +215,9 @@ def draw(canvas):
     else:
         canvas.draw_rect([0.2*WIDTH,0.5*HEIGHT-UNIT],[0.6*WIDTH,2*UNIT],0,(128,128,128),(128,128,128))
         canvas.draw_text('GAME OVER',[WIDTH/2,HEIGHT/2],40,'White',align=('center','middle'))
+        
+    if AUTO_SCREEN_SHOT and move_count == 0 and not game_paused and not game_over:
+        frame.screen_shot()
 
 def setup():
     '''Setup the frame and controls'''
@@ -227,6 +234,9 @@ def setup():
     
     images = dict([(key, simplegui.Image(image_info)) for key, image_info in image_infos.iteritems()])
     
+    if SCREEN_SHOT_FILE:
+        frame.set_screen_shot_file(SCREEN_SHOT_FILE)
+
 if __name__ == '__main__':
     setup()
     

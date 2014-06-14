@@ -35,7 +35,6 @@ class Frame(object):
     Creates a window for drawing and event handling.
     '''
 
-
     def __init__(self, title, size = (640, 480), control_panel_width = 0, fps = 60):
         '''
         Creates the frame
@@ -45,6 +44,9 @@ class Frame(object):
         self.canvas_size = size
         self.control_panel_size = (control_panel_width,size[1])
         self.canvas = Canvas(size)
+        self.screen_shot_file = None
+        self.screen_shot_ext = None
+        self.screen_shot_count = 0
         
         if control_panel_width != 0:
             self.control_panel = ControlPanel(self.control_panel_size,'Grey')
@@ -102,6 +104,11 @@ class Frame(object):
         '''Sets the key up handler'''
         self.key_up_handler = key_up_handler
         
+    def set_screen_shot_file(self, filename, ext='.png'):
+        self.screen_shot_file = filename
+        self.screen_shot_ext = ext
+        self.screen_shot_count = 0
+        
     def add_button(self, text, handler, width, font_height):
         '''Adds a button to the control panel'''
         return self.control_panel.add_button(text, handler, width, font_height)
@@ -109,7 +116,13 @@ class Frame(object):
     def add_label(self, text, width=None, font_height=None):
         '''Adds a label to the control panel'''
         return self.control_panel.add_label(text, width, font_height)
-            
+    
+    def screen_shot(self):
+        if self.screen_shot_file and self.screen_shot_ext:
+            new_file = self.screen_shot_file + '_' + str(self.screen_shot_count) + self.screen_shot_ext
+            pygame.image.save(self.screen, new_file)
+            self.screen_shot_count += 1
+        
     def control_click_handler(self, click_pos):
         '''Calls the control panel click handler'''
         pos = (click_pos[0] - self.canvas_size[0], click_pos[1])
@@ -169,6 +182,9 @@ class Frame(object):
                 elif event.type == pygame.KEYDOWN:
                     if self.key_down_handler:
                         self.key_down_handler(pygame.key.name(event.key))
+                        
+                    if pygame.key.name(event.key) == 'print screen':
+                        self.screen_shot()
                         
                 elif event.type == pygame.KEYUP:
                     if self.key_up_handler:
@@ -303,7 +319,7 @@ class Canvas(object):
         self.Surface.blit(rot_img, pos)
         
 class ControlPanel(Canvas):
-    '''Creates a conrol panel'''
+    '''Creates a control panel'''
     
     def __init__(self, size, color='Black', default_font_h=16):
         '''Initializes the control panel'''
@@ -460,6 +476,8 @@ if __name__ == '__main__':
     frame.set_mouse_right_click_handler(lambda x: print_event('Mouse Right Click:', x))
     frame.set_mouse_move_handler(lambda x: print_event('Mouse Move:', x))
     image1 = Image(image_info1)
+    
+    frame.set_screen_shot_file("E:/Documents/EclipseWorkspace/tmp/test_screen_shot")
     
     frame.set_draw_handler(draw)
     frame.start()#nothing can come after frame.start()
