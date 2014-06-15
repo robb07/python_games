@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 '''
 
 Snake, the game of steering a snake towards food and away from itself.

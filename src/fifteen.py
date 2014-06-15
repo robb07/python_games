@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 '''
 The fifteen tile puzzle game.
 

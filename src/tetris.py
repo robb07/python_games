@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 '''
 Tetris, the game of falling and stacking blocks that collapse when a full row is created
 Created on Jun 9, 2014

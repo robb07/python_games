@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 '''
 Sprite class for drawing and moving simple objects around
 

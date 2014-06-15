@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 '''
 
 Simplegui module has frame class that supports drawing and events.
