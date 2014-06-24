@@ -12,12 +12,12 @@ class Sprite(object):
     Sprite object for drawing and moving around the game canvas
     '''
 
-    def __init__(self, pos, vel, rot, size, color='White', line_color='Black', line_width=1, image=None, draw_method=None):
+    def __init__(self, pos, vel, rot, size, color='White', line_color='Black', line_width=1, image=None, draw_method=None, update_method=None):
         '''
         Constructor
         '''
-        self.pos = list(pos)
-        self.vel = list(vel)
+        self.pos = pos
+        self.vel = vel
         self.rot = rot
         self.size = tuple(size)
         self.color = color
@@ -25,30 +25,27 @@ class Sprite(object):
         self.line_width = line_width
         self.image = image
         self.draw_method = draw_method
+        self.update_method = update_method
         
     def set_pos(self, pos):
         '''Sets the position of the sprite'''
-        self.pos = list(pos)
-        
+        self._pos = list(pos)
+    
     def get_pos(self):
         '''Gets the position of the sprite'''
-        return self.pos
+        return self._pos
+    
+    pos = property(get_pos, set_pos)
     
     def set_vel(self, vel):
         '''Sets the velocity of the sprite'''
-        self.vel = list(vel)
-        
+        self._vel = list(vel)
+         
     def get_vel(self):
         '''Gets the velocity of the sprite'''
-        return self.vel
+        return self._vel
     
-    def set_rot(self, rot):
-        '''Sets the rotation of the sprite'''
-        self.rot = rot
-        
-    def get_rot(self):
-        '''Gets the rotation of the sprite'''
-        return self.rot
+    vel = property(get_vel,set_vel)
     
     def rotate(self, direction):
         '''Rotate the sprite'''
@@ -65,21 +62,32 @@ class Sprite(object):
             rot_mat = [[0,-1],[1,0]]
         return rot_mat
     
+    rot_mat = property(get_rot_mat)
+    
+    def rotate_offset(self, offset):
+        '''Rotates an offset vector around the center point by the objects rotation'''
+        return [self.pos[0] + self.rot_mat[0][0]*offset[0]+self.rot_mat[0][1]*offset[1], self.pos[1] + self.rot_mat[1][0]*offset[0]+self.rot_mat[1][1]*offset[1]]
+    
     def set_size(self, size):
         '''Sets the size of the sprite'''
-        self.size = tuple(size)
-        
+        self._size = tuple(size)
+         
     def get_size(self):
         '''Gets the size of the sprite'''
-        return self.size
+        return self._size
     
-    def update(self, world_size=None):
+    size = property(get_size, set_size)
+    
+    def update(self, world_size=None, default=False):
         '''Updates the sprite's position'''
-        self.pos[0] += self.vel[0]
-        self.pos[1] += self.vel[1]
-        if world_size:
-            self.pos[0] %= world_size[0]
-            self.pos[1] %= world_size[1]
+        if self.update_method and not default:
+            pass
+        else:
+            self.pos[0] += self.vel[0]
+            self.pos[1] += self.vel[1]
+            if world_size:
+                self.pos[0] %= world_size[0]
+                self.pos[1] %= world_size[1]
         
     def draw(self, canvas, default=False):
         '''Draws the sprite'''

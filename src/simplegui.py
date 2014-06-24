@@ -383,13 +383,13 @@ class Button(object):
         self.font_h = font_height
         self.size = (width, 2*self.font_h)
     
-    def set_text(self,text):
-        '''Sets the text of the button'''
-        self.text = text
-        
-    def get_text(self):
-        '''Gets the text of the button'''
-        return self.text
+#     def set_text(self,text):
+#         '''Sets the text of the button'''
+#         self.text = text
+#         
+#     def get_text(self):
+#         '''Gets the text of the button'''
+#         return self.text
     
     def call_handler(self):
         '''Calls the button's event handler'''
@@ -419,13 +419,13 @@ class Label(object):
         self.font_h = font_height
         self.size = (width, 2*self.font_h)
     
-    def set_text(self,text):
-        '''Sets the label's text'''
-        self.text = text
-        
-    def get_text(self):
-        '''Gets the label's text'''
-        return self.text
+#     def set_text(self,text):
+#         '''Sets the label's text'''
+#         self.text = text
+#         
+#     def get_text(self):
+#         '''Gets the label's text'''
+#         return self.text
     
     def draw(self, canvas):
         '''Draws the label'''

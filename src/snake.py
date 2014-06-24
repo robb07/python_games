@@ -41,31 +41,22 @@ images = dict([])
 
 def draw_food(the_food,canvas):
     '''Draws the food as a circle'''
-    canvas.draw_circle(the_food.get_pos(),the_food.get_size()[0]/2,the_food.line_width,the_food.line_color,the_food.color)
+    canvas.draw_circle(the_food.pos,the_food.size[0]/2,the_food.line_width,the_food.line_color,the_food.color)
 
 def draw_head(head, canvas):
     '''Draws the head and eyes'''
     head.draw(canvas,default=True)
-    offset = [0.25*s for s in head.get_size()]
-    rot_mat = head.get_rot_mat()
-    r_offset1 = [rot_mat[0][0]*offset[0]+rot_mat[0][1]*offset[1],rot_mat[1][0]*offset[0]+rot_mat[1][1]*offset[1]]
-    r_offset2 = [rot_mat[0][0]*offset[0]+rot_mat[0][1]*-1*offset[1],rot_mat[1][0]*offset[0]+rot_mat[1][1]*-1*offset[1]]
-    eye1_pos = [head.get_pos()[0]+r_offset1[0], head.get_pos()[1]+r_offset1[1]]
-    eye2_pos = [head.get_pos()[0]+r_offset2[0], head.get_pos()[1]+r_offset2[1]]
+    eye1_pos = head.rotate_offset([0.25*head.size[0], 0.25*head.size[1]])
+    eye2_pos = head.rotate_offset([0.25*head.size[0], -0.25*head.size[1]])
     canvas.draw_circle(eye1_pos,2,1,'Black','Black')
     canvas.draw_circle(eye2_pos,2,1,'Black','Black')
     
 def draw_tail(tail, canvas):
     '''Draws the tail'''
     #tail.draw(canvas,default=True)
-    offset = [0.5*t for t in tail.get_size()]
-    rot_mat = tail.get_rot_mat()
-    r_offset1 = [rot_mat[0][0]*offset[0]+rot_mat[0][1]*offset[1],rot_mat[1][0]*offset[0]+rot_mat[1][1]*offset[1]]
-    r_offset2 = [rot_mat[0][0]*offset[0]+rot_mat[0][1]*-1*offset[1],rot_mat[1][0]*offset[0]+rot_mat[1][1]*-1*offset[1]]
-    r_offset3 = [rot_mat[0][0]*-1*offset[0]+rot_mat[0][1]*0*offset[1],rot_mat[1][0]*-1*offset[0]+rot_mat[1][1]*0*offset[1]]
-    tri_pts = [[tail.get_pos()[0]+r_offset1[0], tail.get_pos()[1]+r_offset1[1]],
-               [tail.get_pos()[0]+r_offset2[0], tail.get_pos()[1]+r_offset2[1]],
-               [tail.get_pos()[0]+r_offset3[0], tail.get_pos()[1]+r_offset3[1]]]
+    tri_pts = [tail.rotate_offset([ 0.5*tail.size[0],  0.5*tail.size[1]]),
+               tail.rotate_offset([ 0.5*tail.size[0], -0.5*tail.size[1]]),
+               tail.rotate_offset([-0.5*tail.size[0],                0.])]
     canvas.draw_polygon(tri_pts, tail.line_width, tail.line_color, tail.color)
     
     
@@ -74,10 +65,14 @@ class Snake(object):
     Snake that moves around the screen growing and eating.
     '''
     
-    def __init__(self,start_pos, vel = [UNIT, 0], unit_size = UNIT, color = 'Gold'):
+    def __init__(self,start_pos, vel = [UNIT, 0], unit_size = UNIT, color = 'Gold', images=None):
         '''Constructor'''
-        self.head = sprite.Sprite(start_pos, vel, 0, (unit_size,unit_size), color, draw_method=draw_head, image=images['head'])
-        self.neck = sprite.Sprite(start_pos, vel, self.head.get_rot(), (unit_size,unit_size), color, image=images['neck'])
+        if images is None:
+            self.images = dict([(key,None) for key in ['head','neck','tail','straight','left','right']])
+        else:
+            self.images = images
+        self.head = sprite.Sprite(start_pos, vel, 0, (unit_size,unit_size), color, draw_method=draw_head, image=self.images['head'])
+        self.neck = sprite.Sprite(start_pos, vel, self.head.rot, (unit_size,unit_size), color, image=self.images['neck'])
         self.body = []
         self.tail = None
         self.size = (unit_size,unit_size)
@@ -87,30 +82,30 @@ class Snake(object):
     
     def update(self):
         '''Update the snakes position, try to eat food, and grow'''
-        new_seg = sprite.Sprite(self.head.get_pos(),[0,0],self.head.get_rot(),self.size,self.color,image=images['straight'])
+        new_seg = sprite.Sprite(self.head.pos,[0,0],self.head.rot,self.size,self.color,image=self.images['straight'])
         
         self.head.update((WIDTH,HEIGHT))
-        if self.neck.rot != self.head.get_rot():
-            if (self.head.get_rot() - self.neck.rot) % 4 == 1:
-                new_seg.image = images['left']
+        if self.neck.rot != self.head.rot:
+            if (self.head.rot - self.neck.rot) % 4 == 1:
+                new_seg.image = self.images['left']
             else:
-                new_seg.image = images['right']
-            self.neck.set_rot(self.head.get_rot())
-        self.neck.set_pos(self.head.get_pos())
+                new_seg.image = self.images['right']
+            self.neck.rot = self.head.rot
+        self.neck.pos = self.head.pos
         if self.eat_food():
             self.body.append(new_seg)
         else:
             self.body.append(new_seg)
             old_seg = self.body.pop(0)
             if self.tail:
-                self.tail.set_pos(old_seg.get_pos())
-                self.tail.set_rot(old_seg.get_rot())
+                self.tail.pos = old_seg.pos
+                self.tail.rot = old_seg.rot
         
         if self.tail is None and len(self.body) > 0:
             self.tail = self.body.pop(0)
             self.tail.draw_method = draw_tail
             #self.tail.image = None
-            self.tail.image = images['tail']
+            self.tail.image = self.images['tail']
         
     def draw(self, canvas):
         '''Draws the snake on the canvas'''
@@ -125,7 +120,7 @@ class Snake(object):
     def eat_food(self):
         '''Eats the food if the head finds it'''
         global food
-        if food and self.head.get_pos() == food.get_pos():
+        if food and self.head.pos == food.pos:
             food = None
             return True
         else:
@@ -134,11 +129,11 @@ class Snake(object):
     def turn(self, direction):
         '''Turn the snake's head'''
         self.head.rotate(direction)
-        vel = self.head.get_vel()
+        vel = self.head.vel
         if direction == -1:
-            self.head.set_vel([-1*vel[1], vel[0]])
+            self.head.vel = [-1*vel[1], vel[0]]
         else:
-            self.head.set_vel([vel[1], -1*vel[0]])
+            self.head.vel = [vel[1], -1*vel[0]]
     
     def control(self, key):
         '''Accept a control input'''
@@ -147,18 +142,16 @@ class Snake(object):
         
     def check_collision(self):
         '''Check for collisions with the snake body'''
-        #if self.head.get_pos()[0] < 0 or  WIDTH < self.head.get_pos()[0] or \
-        #   self.head.get_pos()[1] < 0 or HEIGHT < self.head.get_pos()[1] or \
-        if any([seg.get_pos() == self.head.get_pos() for seg in self.body]):          
+        if any([seg.pos == self.head.pos for seg in self.body]):          
             return True
         else:
             return False
     
     def is_on(self, pos):
         '''Checks to see if the any part of the snake is on the position'''
-        if self.head.get_pos() == pos:
+        if self.head.pos == pos:
             return True
-        return any([seg.get_pos()==pos for seg in self.body])
+        return any([seg.pos==pos for seg in self.body])
     
 def new_food():
     '''Put new food down'''
@@ -171,7 +164,7 @@ def new_game():
     '''Create a new game'''
     global snake, food
     food = None
-    snake = Snake(rand_pos())
+    snake = Snake(rand_pos(),images=images)
 
 def rand_pos():
     '''Creates a random position on the board'''
@@ -185,7 +178,7 @@ def key_down(key):
 def key_up(key):
     '''Key up handler'''
     global game_paused
-    if key == 'p' or key == 'space':
+    if key == 'space':
         game_paused = not game_paused
 
 def mouse_click(pos):
@@ -234,6 +227,7 @@ def setup():
     frame.set_mouse_left_click_handler(mouse_click)
     
     images = dict([(key, simplegui.Image(image_info)) for key, image_info in image_infos.iteritems()])
+    #images = dict([(key, None) for key, image_info in image_infos.iteritems()])
     
     if SCREEN_SHOT_FILE:
         frame.set_screen_shot_file(SCREEN_SHOT_FILE)

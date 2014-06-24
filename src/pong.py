@@ -255,8 +255,8 @@ def new_game():
     else:
         spawn_ball(LEFT)
     
-    paddles = [Paddle('Player 1',(plyr1_button.get_text() == "Player 1: Human"),[0, HEIGHT/2 - HALF_PAD_HEIGHT],(PAD_WIDTH, PAD_HEIGHT),(WIDTH/4,50),['w','s']),
-               Paddle('Player 2',(plyr2_button.get_text() == "Player 2: Human"),[WIDTH-PAD_WIDTH, HEIGHT/2 - HALF_PAD_HEIGHT],(PAD_WIDTH, PAD_HEIGHT),(WIDTH*3/4,50),['up','down'])]
+    paddles = [Paddle('Player 1',(plyr1_button.text == "Player 1: Human"),[0, HEIGHT/2 - HALF_PAD_HEIGHT],(PAD_WIDTH, PAD_HEIGHT),(WIDTH/4,50),['w','s']),
+               Paddle('Player 2',(plyr2_button.text == "Player 2: Human"),[WIDTH-PAD_WIDTH, HEIGHT/2 - HALF_PAD_HEIGHT],(PAD_WIDTH, PAD_HEIGHT),(WIDTH*3/4,50),['up','down'])]
     
         
     game_paused = False
@@ -294,20 +294,20 @@ def keyup(key):
 
 def plyr1_toggle():
     """ Switch between player 1 being controlled by human and computer """
-    if plyr1_button.get_text() == "Player 1: Human":
-        plyr1_button.set_text("Player 1: Computer")
+    if plyr1_button.text == "Player 1: Human":
+        plyr1_button.text = "Player 1: Computer"
         paddles[0].set_human(False)
     else:
-        plyr1_button.set_text("Player 1: Human")
+        plyr1_button.text = "Player 1: Human"
         paddles[0].set_human(True)
 
 def plyr2_toggle():
     """ Switch between player 2 being controlled by human and computer """
-    if plyr2_button.get_text() == "Player 2: Human":
-        plyr2_button.set_text("Player 2: Computer")
+    if plyr2_button.text == "Player 2: Human":
+        plyr2_button.text = "Player 2: Computer"
         paddles[1].set_human(False)
     else:
-        plyr2_button.set_text("Player 2: Human")
+        plyr2_button.text ="Player 2: Human"
         paddles[1].set_human(True)
 
 def pause_game():
@@ -323,7 +323,7 @@ def change_difficulty():
         set_difficulty("Difficult")
     else:
         set_difficulty("Easy")
-    difficulty_button.set_text("Computer: " + difficulty_mode)
+    difficulty_button.text = "Computer: " + difficulty_mode
 
 def mute():
     """ Mute the sound effects. """
