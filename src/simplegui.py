@@ -23,6 +23,8 @@ FONT_FACE_DICT = {'serif':pygame.font.match_font('timesnewroman'),
                   'sans-serif':pygame.font.match_font('arial')}
 FONT_DICT = {}
 
+BACKGROUND_COLORS = ['Black','White','Gray','FireBrick','SteelBlue','Plum',(60,179,71),'Gold',(220,94,56),'SkyBlue']
+
 def get_font(font_face, font_size):
     '''Gets a font object'''
     if not FONT_FACE_DICT.has_key(font_face):
@@ -203,7 +205,11 @@ class Frame(object):
             clock.tick(self.FPS)
             
         pygame.quit()
-        
+    
+    def __repr__(self):
+        '''Returns the class of the object and its fields'''
+        return '%s(%r)' % (self.__class__, self.__dict__)
+    
 class Canvas(object):
     '''Creates the canvas to draw on.'''
     def __init__(self,size, color='Black', default_font_h=16):
@@ -318,7 +324,11 @@ class Canvas(object):
         pos = tuple([int(p) for p in pos])
         rot_img = pygame.transform.rotate(image.img, angle)
         self.Surface.blit(rot_img, pos)
-        
+    
+    def __repr__(self):
+        '''Returns the class of the object and its fields'''
+        return '%s(%r)' % (self.__class__, self.__dict__)
+    
 class ControlPanel(Canvas):
     '''Creates a control panel'''
     
@@ -357,7 +367,10 @@ class ControlPanel(Canvas):
     def click_handler(self, click_pos):
         '''Calls the control that was clicked on by a position'''
         [control.call_handler() for control in self.controls if type(control) == Button and control.click_check(click_pos)]
-            
+    
+    def __repr__(self):
+        '''Returns the class of the object and its fields'''
+        return '%s(%r)' % (self.__class__, self.__dict__)
     
 class Button(object):
     '''Creates a button.'''
@@ -392,6 +405,10 @@ class Button(object):
         '''Checks to see if the button was clicked on by a position'''
         return 0 <= click_pos[0] - self.pos[0] <= self.size[0] and 0 <= click_pos[1] - self.pos[1] <= self.size[1]
        
+    def __repr__(self):
+        '''Returns the class of the object and its fields'''
+        return '%s(%r)' % (self.__class__, self.__dict__)
+    
 class Label(object):
     '''Creates a Label.'''
     
@@ -414,6 +431,9 @@ class Label(object):
         '''Draws the label'''
         canvas.draw_text(self.text, (self.pos[0]+self.size[0]/2,self.pos[1]+self.size[1]/2), self.font_h, 'black', 'sans-serif', ('center','middle'))
     
+    def __repr__(self):
+        '''Returns the class of the object and its fields'''
+        return '%s(%r)' % (self.__class__, self.__dict__)
            
 class Sound(object):
     '''Creates a sound file, currently placeholder'''
@@ -433,14 +453,22 @@ class Sound(object):
     def stop(self):
         '''Stops the sound'''
         pass
-            
+    
+    def __repr__(self):
+        '''Returns the class of the object and its fields'''
+        return '%s(%r)' % (self.__class__, self.__dict__)
+    
 class Image_Info(object):
     '''Image information for an image'''
     def __init__(self, img_file, size):
         '''Constructor'''
         self.img_file = img_file
         self.size = size
-        
+    
+    def __repr__(self):
+        '''Returns the class of the object and its fields'''
+        return 'Image_Info(img_file={0!r}, size={1!r})'.format(self.img_file, self.size)
+    
 class Image(object):
     '''Loads an image into the game'''
     def __init__(self, img_info):
@@ -455,6 +483,10 @@ class Image(object):
     def get_size(self):
         '''Get the image size'''
         return self.img_info.size
+    
+    def __repr__(self):
+        '''Returns the class of the object and its fields'''
+        return 'Image(img_info={0!r})'.format(self.img_info)
         
         
 if __name__ == '__main__':

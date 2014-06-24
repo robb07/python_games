@@ -92,6 +92,12 @@ class Sprite(object):
             #default is to draw a rectangle centered at pos
             canvas.draw_rect([self.pos[0]-0.5*self.size[0],self.pos[1]-0.5*self.size[1]], self.size, self.line_width, self.line_color, self.color)
     
+    def contains(self, pos):
+        '''Returns true if the position is contained in the sprite's rectangle'''
+        return (-0.5*self.size[0] <= pos[0] - self.pos[0] < 0.5*self.size[0]) and (-0.5*self.size[1] <= pos[1] - self.pos[1] < 0.5*self.size[1]) 
     
+    def __repr__(self):
+        '''Returns the class of the object and its fields'''
+        return 'Sprite(pos={0!r}, vel={1!r}, rot={2!r}, size={3!r}, color={4!r}, line_color={5!r}, line_width={6!r}, image={7!r}, draw_method={8!r})'.format(self.pos, self.vel, self.rot, self.size, self.color, self.line_color, self.line_width, self.image, self.draw_method)
     
     
