@@ -14,7 +14,7 @@ SCREEN_SHOT_FILE = "E:/Documents/projects/python_programs/30 days/tetris/tetris_
 AUTO_SCREEN_SHOT = False
 
 BLOCK_H = 30
-WIDTH = 12*BLOCK_H
+WIDTH = 10*BLOCK_H
 HEIGHT = 20*BLOCK_H
 
 game_over = False
