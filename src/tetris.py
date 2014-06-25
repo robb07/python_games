@@ -20,12 +20,12 @@ HEIGHT = 20*BLOCK_H
 game_over = False
 game_paused = False
 cnt = 0
-DROP = 30
+DROP = 20
 
 blocks = []
 current_tetroid = None
-next_tetroid = None
 score = 0
+lines = 0
 
 control_state = dict([('left',False),('right',False),('down',False)])
 
@@ -67,7 +67,7 @@ class Block(sprite.Sprite):
     
     def __init__(self, pos, color, unit=BLOCK_H, image=None):
         '''Initializes the block'''
-        super(Block, self).__init__(pos,[0,0],0,(unit,unit),color,line_color='Black',line_width=1,image=image)
+        super(Block, self).__init__('block',pos,size=(unit,unit),color=color,line_color='Black',line_width=1,image=image)
         
     def get_left_edge(self):
         '''Gets the left edge of the block'''
@@ -85,20 +85,19 @@ class Block(sprite.Sprite):
         '''Gets the bottom edge of the block'''
         return self.pos[1]+0.5*self.size[1]
         
-class Tetroid(object):
+class Tetroid(sprite.Sprite):
     '''A piece of four blocks that falls'''
     
     def __init__(self,name,pos,offsets,color,unit = BLOCK_H, image=None):
         '''Initializes the tetroid'''
-        self.name = name
-        self._rot = 0
-        self.color = color
+        self.blocks = []
         self.offsets = offsets
         self.unit = unit
+        self.block_image = image
+        
+        super(Tetroid, self).__init__(name,pos,size=(3*self.unit,3*self.unit),color=color)
+
         self.blocks = [Block([pos[0]+offset[0]*unit,pos[1]+offset[1]*unit],color,unit,image=image) for offset in offsets]
-        
-        self.pos = pos
-        
     
     def set_pos(self, pos):
         '''Sets the position of the tetroid'''
@@ -121,25 +120,7 @@ class Tetroid(object):
         return self._rot
     
     rot = property(get_rot, set_rot)
-    
-    def get_rot_mat(self):
-        '''Gets the rotation matrix for the tetroid'''
-        if self.rot == 0:
-            rot_mat = [[1,0],[0,1]]
-        elif self.rot == 1:
-            rot_mat = [[0,1],[-1,0]]
-        elif self.rot == 2:
-            rot_mat = [[-1,0],[0,-1]]
-        elif self.rot == 3:
-            rot_mat = [[0,-1],[1,0]]
-        return rot_mat
-    
-    rot_mat = property(get_rot_mat)
-    
-    def rotate_offset(self, offset):
-        '''Rotates an offset vector around the center point by the objects rotation'''
-        return [self.pos[0] + self.rot_mat[0][0]*offset[0]+self.rot_mat[0][1]*offset[1], self.pos[1] + self.rot_mat[1][0]*offset[0]+self.rot_mat[1][1]*offset[1]]
-    
+        
     def draw(self, canvas):
         '''Draws the tetroid'''
         for block in self.blocks:
@@ -152,16 +133,12 @@ class Tetroid(object):
             
     def rotate(self, direction):
         '''Rotates the tetroid +1 for clockwise, -1 for counterclockwise'''
-        self.rot = (self.rot + direction) % 4
+        super(Tetroid, self).rotate(direction)
         
         if any([block.pos[0] < 0 or block.pos[0] >= WIDTH or \
                 block.pos[1] >= HEIGHT for block in self.blocks]) or \
            not no_overlaps_w_blocks(self.blocks,[0,0]):
-            self.rot = (self.rot - direction) % 4
-    
-    def move(self, movement):
-        '''Moves the tetroid the movement amount'''
-        self.pos = [self.pos[0]+movement[0], self.pos[1]+movement[1]]
+            super(Tetroid, self).rotate(-direction)
         
     def move_left(self):
         '''Moves the tetroid one unit to the left'''
@@ -193,10 +170,10 @@ def no_overlaps_w_blocks(tetroid_blocks, move):
 
 def remove_completed_rows():
     '''Removes any rows that are completed'''
-    global score
+    rows_to_remove = []
     if len(blocks)>0:
         highest_row = min([block.get_top_edge() for block in blocks])
-        rows_to_remove = []
+        
         
         for i in range(int((HEIGHT - highest_row) / BLOCK_H + 1)):
             row = [block for block in blocks if (HEIGHT-block.get_top_edge())/BLOCK_H==i]
@@ -206,18 +183,28 @@ def remove_completed_rows():
                 
                 for block in row:
                     blocks.remove(block)
-        
+    
+    
         for block in blocks:
             x, y = block.pos
             del_y = BLOCK_H * len([i for i in rows_to_remove if (HEIGHT-block.get_top_edge())/BLOCK_H>i])
             block.pos = [x,y+del_y]
-        
-        score += len(rows_to_remove)
-        score_label.text = 'Score: '+str(score)
+    return rows_to_remove
+
+def increase_score(num_rows):
+    '''Increase the score'''
+    global score, lines
+    lines += num_rows
+    lines_label.text = 'Lines: '+str(lines)
+    
+    if num_rows == 4:
+        num_rows *= 2
+    score += num_rows*100
+    score_label.text = 'Score: '+str(score)
         
 def draw(canvas):
     '''Draw the board'''
-    global cnt, game_over, current_tetroid, next_tetroid
+    global cnt, game_over, current_tetroid
     
     if not game_paused and not game_over:
         cnt = (cnt + 1) % DROP
@@ -239,14 +226,15 @@ def draw(canvas):
             current_tetroid.move_down()
             if old_pos == current_tetroid.pos:
                 [blocks.append(block) for block in current_tetroid.blocks]
-                current_tetroid, next_tetroid = next_tetroid, new_tetroid()
-                next_label.text = 'Next: ' + next_tetroid.name
+                current_tetroid = next_tetroid()
+                
                 if not no_overlaps_w_blocks(current_tetroid.blocks,[0,0]):
                     game_over = True
                     
         current_tetroid.draw(canvas)
     
-    remove_completed_rows()
+    removed_rows = remove_completed_rows()
+    increase_score(len(removed_rows))
     
     for block in blocks:
         block.draw(canvas)
@@ -262,20 +250,28 @@ def new_tetroid():
     '''Creates a new random Tetroid'''
     key = random.choice(TETROID_OFFSET_DICT.keys())
     image = images[TETROID_IMAGE_COLOR_DICT[key]]
-    return Tetroid(key,[0.5*BLOCK_H+WIDTH/2,0.5*BLOCK_H],TETROID_OFFSET_DICT[key],TETROID_COLOR_DICT[key],image=image)
+    tetroid = Tetroid(key,[0,0],TETROID_OFFSET_DICT[key],TETROID_COLOR_DICT[key],image=image)
+    
+    return tetroid
 
+def next_tetroid():
+    '''Sets the preview pane to the new tetroid and puts the previewed tetroid on the board'''
+    tetroid = next_container.sprite
+    tetroid.pos = [0.5*BLOCK_H+WIDTH/2,0.5*BLOCK_H]
+    next_container.sprite = new_tetroid()
+    return tetroid
+    
 def new_game():
     '''Clears the board and starts a new game'''
-    global blocks, game_over, game_paused, current_tetroid, next_tetroid
+    global blocks, game_over, game_paused, current_tetroid
     
     blocks = []
     
     game_over = False
     game_paused = False
     
-    current_tetroid = new_tetroid()
-    next_tetroid = new_tetroid()
-    next_label.text = 'Next: ' + next_tetroid.name
+    current_tetroid = next_tetroid()
+    
 
 def key_down(key):
     '''Handles the key down events'''
@@ -306,23 +302,26 @@ def pause():
     
 def setup():
     '''Setup the frame and event handlers'''
-    global frame, next_label, score_label, images
-    frame = simplegui.Frame('Tetris',(WIDTH,HEIGHT),100)
+    global frame, next_container, score_label, lines_label, images
+    frame = simplegui.Frame('Tetris',(WIDTH,HEIGHT),200)
     frame.set_draw_handler(draw)
     frame.set_key_down_handler(key_down)
     frame.set_key_up_handler(key_up)
     
+    images = dict([(key, simplegui.Image(image_info)) for key, image_info in image_infos.iteritems()])
+    #images = dict([(key, None) for key, image_info in image_infos.iteritems()])
+    
+    #Build the control panel
     frame.add_label('')
-    next_label = frame.add_label('Next: ?')
+    next_container = frame.control_panel.add_sprite_container(new_tetroid())
     score_label = frame.add_label('Score: 0')
+    lines_label = frame.add_label('Lines: 0')
     frame.add_label('')
     frame.add_label('Pause: space')
     frame.add_label('New Game: return')
     frame.add_label('Rotate: a,s')
     frame.add_label('Move: arrows')
     
-    images = dict([(key, simplegui.Image(image_info)) for key, image_info in image_infos.iteritems()])
-    #images = dict([(key, None) for key, image_info in image_infos.iteritems()])
     
     if SCREEN_SHOT_FILE:
         frame.set_screen_shot_file(SCREEN_SHOT_FILE)

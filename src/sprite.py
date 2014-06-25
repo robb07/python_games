@@ -12,10 +12,11 @@ class Sprite(object):
     Sprite object for drawing and moving around the game canvas
     '''
 
-    def __init__(self, pos, vel, rot, size, color='White', line_color='Black', line_width=1, image=None, draw_method=None, update_method=None):
+    def __init__(self, name=None, pos=[0,0], vel=[0,0], rot=0, size=(10,10), color='White', line_color='Black', line_width=1, image=None, draw_method=None, update_method=None):
         '''
         Constructor
         '''
+        self.name = name
         self.pos = pos
         self.vel = vel
         self.rot = rot
@@ -65,7 +66,7 @@ class Sprite(object):
     rot_mat = property(get_rot_mat)
     
     def rotate_offset(self, offset):
-        '''Rotates an offset vector around the center point by the objects rotation'''
+        '''Rotates an offset vector around the center point by the sprite's rotation'''
         return [self.pos[0] + self.rot_mat[0][0]*offset[0]+self.rot_mat[0][1]*offset[1], self.pos[1] + self.rot_mat[1][0]*offset[0]+self.rot_mat[1][1]*offset[1]]
     
     def set_size(self, size):
@@ -78,13 +79,16 @@ class Sprite(object):
     
     size = property(get_size, set_size)
     
+    def move(self, movement):
+        '''Moves the sprite the movement amount'''
+        self.pos = [self.pos[0]+movement[0], self.pos[1]+movement[1]]
+        
     def update(self, world_size=None, default=False):
         '''Updates the sprite's position'''
         if self.update_method and not default:
-            pass
+            self.update_method(self, world_size)
         else:
-            self.pos[0] += self.vel[0]
-            self.pos[1] += self.vel[1]
+            self.move(self.vel)
             if world_size:
                 self.pos[0] %= world_size[0]
                 self.pos[1] %= world_size[1]
@@ -106,6 +110,6 @@ class Sprite(object):
     
     def __repr__(self):
         '''Returns the class of the object and its fields'''
-        return 'Sprite(pos={0!r}, vel={1!r}, rot={2!r}, size={3!r}, color={4!r}, line_color={5!r}, line_width={6!r}, image={7!r}, draw_method={8!r})'.format(self.pos, self.vel, self.rot, self.size, self.color, self.line_color, self.line_width, self.image, self.draw_method)
+        return 'Sprite(name={0!r}, pos={1!r}, vel={2!r}, rot={3!r}, size={4!r}, color={5!r}, line_color={6!r}, line_width={7!r}, image={8!r}, draw_method={9!r}, update_method={10!r})'.format(self.name, self.pos, self.vel, self.rot, self.size, self.color, self.line_color, self.line_width, self.image, self.draw_method, self.update_method)
     
     

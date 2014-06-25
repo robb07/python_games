@@ -338,12 +338,16 @@ class ControlPanel(Canvas):
         self.controls = []
         self.spacing = 5
         
-        
+    
+    def get_offset(self):
+        '''Offset for the next item'''
+        return (self.size[0]/2, sum([self.spacing + c.size[1] for c in self.controls]))
+    
+    offset = property(get_offset)
+    
     def add_button(self, text, handler, width, font_height):
         '''Adds a button to the control panel'''
-        x_offset = self.size[0]/2 - width/2
-        y_offset = sum([self.spacing + b.size[1] for b in self.controls])
-        button = Button(text, handler, (x_offset, y_offset), width, font_height)
+        button = Button(text, handler, self.offset, width, font_height)
         self.controls.append(button)
         return button
         
@@ -353,11 +357,16 @@ class ControlPanel(Canvas):
             width = self.size[0]
         if not font_height:
             font_height = self.default_font_h
-        x_offset = self.size[0]/2 - width/2
-        y_offset = sum([self.spacing + b.size[1] for b in self.controls])
-        label = Label(text, (x_offset, y_offset), width, font_height)
+        
+        label = Label(text, self.offset, width, font_height)
         self.controls.append(label)
         return label
+        
+    def add_sprite_container(self, sprite):
+        '''Adds a sprite to the control panel'''
+        sprite_container = Sprite_Container(sprite, self.offset)
+        self.controls.append(sprite_container)
+        return sprite_container
         
     def draw_controls(self):
         '''Draws the controls'''
@@ -383,14 +392,6 @@ class Button(object):
         self.font_h = font_height
         self.size = (width, 2*self.font_h)
     
-#     def set_text(self,text):
-#         '''Sets the text of the button'''
-#         self.text = text
-#         
-#     def get_text(self):
-#         '''Gets the text of the button'''
-#         return self.text
-    
     def call_handler(self):
         '''Calls the button's event handler'''
         if self.handler:
@@ -398,8 +399,8 @@ class Button(object):
             
     def draw(self, canvas):
         '''Draws the button'''
-        canvas.draw_rect(self.pos, self.size, 1, 'black', 'grey')
-        canvas.draw_text(self.text, (self.pos[0]+self.size[0]/2,self.pos[1]+self.size[1]/2), self.font_h, 'black', 'sans-serif', ('center','middle'))
+        canvas.draw_rect((self.pos[0]-self.size[0]/2,self.pos[1]), self.size, 1, 'black', 'grey')
+        canvas.draw_text(self.text, (self.pos[0],self.pos[1]+self.size[1]/2), self.font_h, 'black', 'sans-serif', ('center','middle'))
     
     def click_check(self, click_pos):
         '''Checks to see if the button was clicked on by a position'''
@@ -419,22 +420,51 @@ class Label(object):
         self.font_h = font_height
         self.size = (width, 2*self.font_h)
     
-#     def set_text(self,text):
-#         '''Sets the label's text'''
-#         self.text = text
-#         
-#     def get_text(self):
-#         '''Gets the label's text'''
-#         return self.text
-    
     def draw(self, canvas):
         '''Draws the label'''
-        canvas.draw_text(self.text, (self.pos[0]+self.size[0]/2,self.pos[1]+self.size[1]/2), self.font_h, 'black', 'sans-serif', ('center','middle'))
+        canvas.draw_text(self.text, (self.pos[0],self.pos[1]+self.size[1]/2), self.font_h, 'black', 'sans-serif', ('center','middle'))
     
     def __repr__(self):
         '''Returns the class of the object and its fields'''
         return '%s(%r)' % (self.__class__, self.__dict__)
            
+class Sprite_Container(object):
+    '''Creates a container for a sprite'''
+    def __init__(self, sprite, pos):
+        '''Initializes the container'''
+        self.pos = pos
+        self.sprite = sprite
+        
+    
+    def set_sprite(self, sprite):
+        '''Sets the sprite'''
+        self._sprite = sprite
+        if self._sprite:
+            self._sprite.pos = self.pos
+            
+    def get_sprite(self):
+        '''Gets the sprite'''
+        return self._sprite
+    
+    sprite = property(get_sprite, set_sprite)
+    
+    def draw(self, canvas):
+        '''Draws the sprite'''
+        if self.sprite:
+            self.sprite.draw(canvas)
+            
+    def get_size(self):
+        '''Gets the size of the container'''
+        if self.sprite:
+            return self.sprite.size
+        else:
+            return (0,0)
+        
+    size = property(get_size)
+    
+    def __repr__(self):
+        '''Returns the class of the object and its fields'''
+        return '%s(%r)' % (self.__class__, self.__dict__)
 class Sound(object):
     '''Creates a sound file, currently placeholder'''
     

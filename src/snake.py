@@ -71,8 +71,8 @@ class Snake(object):
             self.images = dict([(key,None) for key in ['head','neck','tail','straight','left','right']])
         else:
             self.images = images
-        self.head = sprite.Sprite(start_pos, vel, 0, (unit_size,unit_size), color, draw_method=draw_head, image=self.images['head'])
-        self.neck = sprite.Sprite(start_pos, vel, self.head.rot, (unit_size,unit_size), color, image=self.images['neck'])
+        self.head = sprite.Sprite('head', start_pos, vel, 0, (unit_size,unit_size), color, draw_method=draw_head, image=self.images['head'])
+        self.neck = sprite.Sprite('neck', start_pos, vel, self.head.rot, (unit_size,unit_size), color, image=self.images['neck'])
         self.body = []
         self.tail = None
         self.size = (unit_size,unit_size)
@@ -82,7 +82,7 @@ class Snake(object):
     
     def update(self):
         '''Update the snakes position, try to eat food, and grow'''
-        new_seg = sprite.Sprite(self.head.pos,[0,0],self.head.rot,self.size,self.color,image=self.images['straight'])
+        new_seg = sprite.Sprite('seg',self.head.pos,[0,0],self.head.rot,self.size,self.color,image=self.images['straight'])
         
         self.head.update((WIDTH,HEIGHT))
         if self.neck.rot != self.head.rot:
@@ -103,6 +103,7 @@ class Snake(object):
         
         if self.tail is None and len(self.body) > 0:
             self.tail = self.body.pop(0)
+            self.tail.name = 'tail'
             self.tail.draw_method = draw_tail
             #self.tail.image = None
             self.tail.image = self.images['tail']
@@ -144,12 +145,16 @@ class Snake(object):
         '''Check for collisions with the snake body'''
         if any([seg.pos == self.head.pos for seg in self.body]):          
             return True
+        elif self.tail and self.tail.pos == self.head.pos:
+            return True
         else:
             return False
     
     def is_on(self, pos):
         '''Checks to see if the any part of the snake is on the position'''
         if self.head.pos == pos:
+            return True
+        if self.tail and self.tail.pos == pos:
             return True
         return any([seg.pos==pos for seg in self.body])
     
@@ -158,7 +163,7 @@ def new_food():
     food_pos = rand_pos()
     while snake.is_on(food_pos):
         food_pos = rand_pos()
-    return sprite.Sprite(food_pos,[0,0],0,[UNIT,UNIT],FOOD_COLOR,line_color=FOOD_COLOR,draw_method=draw_food,image=images['food'])
+    return sprite.Sprite('food',food_pos,[0,0],0,[UNIT,UNIT],FOOD_COLOR,line_color=FOOD_COLOR,draw_method=draw_food,image=images['food'])
 
 def new_game():
     '''Create a new game'''

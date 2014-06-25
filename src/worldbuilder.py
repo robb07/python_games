@@ -99,7 +99,7 @@ def new_world():
     
 def new_cursor(pos):
     '''Makes a new cursor'''
-    return sprite.Sprite(pos,[0,0],0,(BLOCK_H,BLOCK_H),image=images[cursor_color])
+    return sprite.Sprite('block',pos,size=(BLOCK_H,BLOCK_H),image=images[cursor_color])
     
 if __name__ == '__main__':
     setup()
