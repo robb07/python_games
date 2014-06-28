@@ -16,6 +16,7 @@ AUTO_SCREEN_SHOT = False
 BLOCK_H = 30
 WIDTH = 10*BLOCK_H
 HEIGHT = 20*BLOCK_H
+IMAGES_ON = False
 
 game_over = False
 game_paused = False
@@ -162,7 +163,7 @@ class Tetroid(sprite.Sprite):
 def no_overlaps_w_blocks(tetroid_blocks, move):
     '''Checks to see if the blocks movement will overlap a laid down block'''
     for block in tetroid_blocks:
-        new_pos = [p + m for p, m in zip(block.pos, move)]
+        new_pos = (block.pos[0] + move[0], block.pos[1] + move[1])
         for check_block in blocks:
             if check_block.pos == new_pos:
                 return False
@@ -210,7 +211,7 @@ def draw(canvas):
         cnt = (cnt + 1) % DROP
         
         if cnt % 2 == 0:
-            for control,state in control_state.iteritems():
+            for control, state in control_state.iteritems():
                 if state:
                     if control == 'left':
                         current_tetroid.move_left()
@@ -308,8 +309,10 @@ def setup():
     frame.set_key_down_handler(key_down)
     frame.set_key_up_handler(key_up)
     
-    images = dict([(key, simplegui.Image(image_info)) for key, image_info in image_infos.iteritems()])
-    #images = dict([(key, None) for key, image_info in image_infos.iteritems()])
+    if IMAGES_ON:
+        images = dict([(key, simplegui.Image(image_info)) for key, image_info in image_infos.iteritems()])
+    else:
+        images = dict([(key, None) for key, image_info in image_infos.iteritems()])
     
     #Build the control panel
     frame.add_label('')

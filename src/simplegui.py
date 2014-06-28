@@ -23,7 +23,18 @@ FONT_FACE_DICT = {'serif':pygame.font.match_font('timesnewroman'),
                   'sans-serif':pygame.font.match_font('arial')}
 FONT_DICT = {}
 
-BACKGROUND_COLORS = ['Black','White','Gray','FireBrick','SteelBlue','Plum',(60,179,71),'Gold',(220,94,56),'SkyBlue']
+COLOR_PALETTE = dict([('Black','Black'),
+                      ('White','Ivory'),
+                      ('Gray','Gray'),
+                      ('Red','FireBrick'),
+                      ('Blue','SteelBlue'),
+                      ('Purple','Plum'),
+                      ('Green',(60,179,71)),
+                      ('Yellow','Gold'),
+                      ('Orange',(220,94,56)),
+                      ('LightBlue','SkyBlue')])
+
+BACKGROUND_COLORS = COLOR_PALETTE.keys()
 
 def get_font(font_face, font_size):
     '''Gets a font object'''
@@ -38,7 +49,7 @@ class Frame(object):
     Creates a window for drawing and event handling.
     '''
 
-    def __init__(self, title, size = (640, 480), control_panel_width = 0, fps = 60):
+    def __init__(self, title, size = (640, 480), control_panel_width = 0, fps = 60, canvas_color='Black', control_panel_color='Gray'):
         '''
         Creates the frame
         '''
@@ -46,13 +57,13 @@ class Frame(object):
         self.screen = pygame.display.set_mode((size[0]+control_panel_width,size[1]))
         self.canvas_size = size
         self.control_panel_size = (control_panel_width,size[1])
-        self.canvas = Canvas(size)
+        self.canvas = Canvas(size,color=canvas_color)
         self.screen_shot_file = None
         self.screen_shot_ext = None
         self.screen_shot_count = 0
         
         if control_panel_width != 0:
-            self.control_panel = ControlPanel(self.control_panel_size,'Grey')
+            self.control_panel = ControlPanel(self.control_panel_size,color=control_panel_color)
         else:
             self.control_panel = None
         

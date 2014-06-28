@@ -22,6 +22,7 @@ UNIT = 40
 MOVE_COUNT = 30
 BACKGROUND_COLOR = 'SteelBlue'
 FOOD_COLOR = 'White'
+IMAGES_ON = False
 
 game_over = False
 game_paused = False
@@ -38,10 +39,6 @@ image_infos = dict([('head',simplegui.Image_Info('../lib/images/snake_head.png',
                     ('food',simplegui.Image_Info('../lib/images/snake_food.png',(UNIT,UNIT)))])
 images = dict([])
 
-
-def draw_food(the_food,canvas):
-    '''Draws the food as a circle'''
-    canvas.draw_circle(the_food.pos,the_food.size[0]/2,the_food.line_width,the_food.line_color,the_food.color)
 
 def draw_head(head, canvas):
     '''Draws the head and eyes'''
@@ -71,7 +68,7 @@ class Snake(object):
             self.images = dict([(key,None) for key in ['head','neck','tail','straight','left','right']])
         else:
             self.images = images
-        self.head = sprite.Sprite('head', start_pos, vel, 0, (unit_size,unit_size), color, draw_method=draw_head, image=self.images['head'])
+        self.head = sprite.Sprite('head', start_pos, vel, 0, (unit_size,unit_size), color, draw_method=draw_head, image=self.images['head'], update_method=sprite.update_toroid)
         self.neck = sprite.Sprite('neck', start_pos, vel, self.head.rot, (unit_size,unit_size), color, image=self.images['neck'])
         self.body = []
         self.tail = None
@@ -163,7 +160,7 @@ def new_food():
     food_pos = rand_pos()
     while snake.is_on(food_pos):
         food_pos = rand_pos()
-    return sprite.Sprite('food',food_pos,[0,0],0,[UNIT,UNIT],FOOD_COLOR,line_color=FOOD_COLOR,draw_method=draw_food,image=images['food'])
+    return sprite.Sprite('food',food_pos,[0,0],0,[UNIT,UNIT],FOOD_COLOR,line_color=FOOD_COLOR,draw_method=sprite.draw_circle,image=images['food'])
 
 def new_game():
     '''Create a new game'''
@@ -231,9 +228,12 @@ def setup():
     frame.set_key_up_handler(key_up)
     frame.set_mouse_left_click_handler(mouse_click)
     
-    images = dict([(key, simplegui.Image(image_info)) for key, image_info in image_infos.iteritems()])
-    #images = dict([(key, None) for key, image_info in image_infos.iteritems()])
-    
+    #configure images
+    if IMAGES_ON:
+        images = dict([(key, simplegui.Image(image_info)) for key, image_info in image_infos.iteritems()])
+    else:
+        images = dict([(key, None) for key, image_info in image_infos.iteritems()])
+        
     if SCREEN_SHOT_FILE:
         frame.set_screen_shot_file(SCREEN_SHOT_FILE)
 
