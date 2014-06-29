@@ -1,5 +1,7 @@
 #!/usr/bin/env python
 '''
+Breakout, the game of breaking bricks
+
 Created on Jun 28, 2014
 
 @author: Robb
@@ -11,7 +13,7 @@ import random
 import math
 
 #SCREEN_SHOT_FILE = None
-SCREEN_SHOT_FILE = "E:/Documents/projects/python_programs/30 days/tetris/tetris_screen_shot"
+SCREEN_SHOT_FILE = "E:/Documents/projects/python_programs/30 days/breakout/breakout_screen_shot"
 AUTO_SCREEN_SHOT = False
 
 BRICK_H = 25
@@ -46,7 +48,7 @@ gutter = None
 score = 0
 multiplier = 1
 cnt = 0
-COUNT_FULL = 20
+COUNT_FULL = 10
 
 image_infos = dict([(color,None) for color in simplegui.COLOR_PALETTE.keys() if color != BACKGROUND_COLOR])
 images = dict([])
