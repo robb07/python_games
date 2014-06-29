@@ -14,11 +14,13 @@ import math
 SCREEN_SHOT_FILE = "E:/Documents/projects/python_programs/30 days/tetris/tetris_screen_shot"
 AUTO_SCREEN_SHOT = False
 
-BRICK_SIZE = (50,20)
-GRID_WIDTH = 20
-GRID_HEIGHT = 30
-TOP_GAP = 3
-NUM_ROWS = 15
+BRICK_H = 25
+BRICK_RATIO = 2.5 # to 1
+BRICK_SIZE = (int(BRICK_H*BRICK_RATIO),BRICK_H)
+GRID_WIDTH = 15
+GRID_HEIGHT = 25
+TOP_GAP = 7
+NUM_ROWS = 8
 
 WIDTH = GRID_WIDTH*BRICK_SIZE[0]
 HEIGHT = GRID_HEIGHT*BRICK_SIZE[1]
@@ -39,7 +41,7 @@ game_paused = False
 brick_rows = []
 ball = None
 paddle = None
-die = None
+gutter = None
 
 score = 0
 multiplier = 1
@@ -53,11 +55,11 @@ control_state = dict([('left',False),('right',False)])
 
 def draw(canvas):
     '''Draws the board, bricks, paddle, and ball'''
-    global ball, game_over, cnt
+    global brick_rows, ball, game_over, cnt
     if not game_paused and not game_over:
         cnt = (cnt + 1) % COUNT_FULL
         
-        if die and ball and ball.overlaps(die):
+        if gutter and ball and ball.overlaps(gutter):
             if len(spare_balls) > 0:
                 spare_balls.pop()
                 ball = new_ball()
@@ -89,7 +91,7 @@ def draw(canvas):
     if ball:
         ball.draw(canvas)
     
-    canvas.draw_text(str(score),continuous_pos((GRID_WIDTH-1,TOP_GAP/2.)),20,'White',align=('right','middle'))
+    canvas.draw_text(str(score),grid_to_continuous((GRID_WIDTH-1,1)),30,'White',align=('right','middle'))
     
     for spare in spare_balls:
         spare.draw(canvas)
@@ -98,26 +100,32 @@ def draw(canvas):
         canvas.draw_rect([0.25*WIDTH,0.5*HEIGHT-40],[0.5*WIDTH,2*40],2,'Black','Gray')
         canvas.draw_text('GAME OVER',[WIDTH/2,HEIGHT/2],40,'White',align=('center','middle'))
         
+    if sum([len(brick_row) for brick_row in brick_rows]) == 0 and continuous_to_grid(ball.pos)[1]>NUM_ROWS+TOP_GAP+1:
+        brick_rows = new_bricks()
+        
     if AUTO_SCREEN_SHOT and cnt == 0 and not game_paused and not game_over:
         frame.screen_shot()
     
 
 def new_game():
     '''Resets the board'''
-    global brick_rows, paddle, ball, spare_balls, die, game_over
+    global brick_rows, paddle, ball, spare_balls, gutter, game_over
     game_over = False
     
-    brick_rows = [[make_brick([col + (0.5 if row % 2 == 1 else 0),row],random_color()) for col in range(GRID_WIDTH+1)] for row in range(TOP_GAP,TOP_GAP+NUM_ROWS)]
+    brick_rows = new_bricks()
     ball = new_ball()
-    spare_balls = make_spare_balls((0,TOP_GAP/2.))
+    spare_balls = make_spare_balls((0,1))
     paddle = new_paddle()
-    die = sprite.Sprite(pos=(WIDTH/2,HEIGHT),size=(WIDTH,2))
+    gutter = sprite.Sprite(pos=(WIDTH/2,HEIGHT),size=(WIDTH,2))
     
-    
+def new_bricks():
+    '''Returns a new set of bricks'''
+    return [[make_brick([col + (0.5 if row % 2 == 1 else 0),row],random_color()) for col in range(GRID_WIDTH+(0 if row % 2 == 1 else 1))] for row in range(TOP_GAP,TOP_GAP+NUM_ROWS)]
+
 def new_ball():
     '''Returns a new ball'''
     return sprite.Sprite(name='Ball',
-                         pos=continuous_pos([GRID_WIDTH/2, GRID_HEIGHT - (GRID_HEIGHT - NUM_ROWS - TOP_GAP)/2]),
+                         pos=grid_to_continuous([GRID_WIDTH/2, GRID_HEIGHT - (GRID_HEIGHT - NUM_ROWS - TOP_GAP)/2]),
                          vel=random_vel(ball_speed,[-45,-135]),
                          size=BALL_SIZE,
                          color=simplegui.COLOR_PALETTE['White'],
@@ -128,7 +136,7 @@ def new_ball():
 def new_paddle():
     '''Makes a paddle'''
     return sprite.Sprite(name='Paddle',
-                         pos=continuous_pos([GRID_WIDTH/2, GRID_HEIGHT - 2]),
+                         pos=grid_to_continuous([GRID_WIDTH/2, GRID_HEIGHT - 2]),
                          size=PADDLE_SIZE,
                          color=simplegui.COLOR_PALETTE['White'],
                          image=None,
@@ -136,7 +144,7 @@ def new_paddle():
 
 def make_spare_balls(grid_pos):
     '''Makes the spare balls'''
-    cont_pos = continuous_pos(grid_pos)
+    cont_pos = grid_to_continuous(grid_pos)
     return [sprite.Sprite(name='SpareBall',
                          pos=(cont_pos[0]+(i+1)*BALL_SIZE[0],cont_pos[1]),
                          size=BALL_SIZE,
@@ -147,14 +155,19 @@ def make_spare_balls(grid_pos):
 def make_brick(grid_pos, color):
     '''Makes a brick'''
     return sprite.Sprite(name=color,
-                         pos=continuous_pos(grid_pos),
+                         pos=grid_to_continuous(grid_pos),
                          size=BRICK_SIZE,
                          color=simplegui.COLOR_PALETTE[color],
+                         line_width=2,
                          image=images[color])
 
-def continuous_pos(grid_pos):
+def grid_to_continuous(grid_pos):
     '''Translates grid coordinates to continuous position'''
-    return [BRICK_SIZE[0]*grid_pos[0],BRICK_SIZE[1]*grid_pos[1]]
+    return (BRICK_SIZE[0]*grid_pos[0],BRICK_SIZE[1]*grid_pos[1])
+
+def continuous_to_grid(cont_pos):
+    '''Translates continuous coordinates to grid positon'''
+    return (int(round(cont_pos[0]/BRICK_SIZE[0])), int(round(cont_pos[1]/BRICK_SIZE[1])))
 
 def random_color():
     '''Returns a random color'''
@@ -168,14 +181,22 @@ def random_vel(speed,angle_range=[0,360]):
 def paddle_bounce(paddle, ball):
     '''Bounces the ball off the paddle'''
     if paddle and ball.overlaps(paddle):
-        ball.vel = (ball.vel[0]+0.1*paddle.vel[0], -abs(ball.vel[1]))
+        gap = ball.gap_between(paddle)
+        x_bounce = -1 if gap[0] > gap[1] else 1
+        ball.vel = (x_bounce*ball.vel[0]+0.1*paddle.vel[0], -abs(ball.vel[1]))
         return True
     return False
     
 def bricks_bounce(brick_rows, ball):
     '''Bounces the ball of the bricks'''
+    
+    ball_grid_pos = continuous_to_grid(ball.pos)
+    row_guess = ball_grid_pos[1]-TOP_GAP
+    row_low  = min(max(row_guess-2,              0),len(brick_rows)-1)
+    row_high = max(min(row_guess+2,len(brick_rows)),1)
+    
     remove_brick = None
-    for brick_row in brick_rows:
+    for brick_row in brick_rows[row_low:row_high]:
         for brick in brick_row:
             if ball.overlaps(brick):
                 gap = ball.gap_between(brick)
