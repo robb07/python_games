@@ -14,4 +14,5 @@ Here are the games in the repository:
 2. Pong
 3. Tetris
 4. Snake
-5. World Builder -- tool for building worlds 
+5. Breakout
+6. World Builder -- tool for building worlds 
