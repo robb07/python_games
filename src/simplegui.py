@@ -373,9 +373,9 @@ class ControlPanel(Canvas):
         self.controls.append(label)
         return label
         
-    def add_sprite_container(self, sprite):
+    def add_sprite_container(self, sprite, size=None):
         '''Adds a sprite to the control panel'''
-        sprite_container = Sprite_Container(sprite, self.offset)
+        sprite_container = Sprite_Container(sprite, self.offset, size=size)
         self.controls.append(sprite_container)
         return sprite_container
         
@@ -441,12 +441,12 @@ class Label(object):
            
 class Sprite_Container(object):
     '''Creates a container for a sprite'''
-    def __init__(self, sprite, pos):
+    def __init__(self, sprite, pos, size=None):
         '''Initializes the container'''
         self.pos = pos
         self.sprite = sprite
+        self._size = size
         
-    
     def set_sprite(self, sprite):
         '''Sets the sprite'''
         self._sprite = sprite
@@ -461,16 +461,20 @@ class Sprite_Container(object):
     
     def draw(self, canvas):
         '''Draws the sprite'''
+        #canvas.draw_rect((self.pos[0]-self.size[0]/2,self.pos[1]), self.size, 1, 'black', 'grey')
         if self.sprite:
             self.sprite.draw(canvas)
             
     def get_size(self):
         '''Gets the size of the container'''
-        if self.sprite:
-            return self.sprite.size
+        if self._size is None: 
+            if self.sprite:
+                return self.sprite.size
+            else:
+                return (0,0)
         else:
-            return (0,0)
-        
+            return self._size
+    
     size = property(get_size)
     
     def __repr__(self):

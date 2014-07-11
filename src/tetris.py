@@ -23,10 +23,13 @@ game_paused = False
 cnt = 0
 DROP = 20
 
-blocks = []
+#blocks = []
+block_rows = []
+
 current_tetroid = None
 score = 0
 lines = 0
+high_score = 0
 
 control_state = dict([('left',False),('right',False),('down',False)])
 
@@ -96,10 +99,10 @@ class Tetroid(sprite.Sprite):
         self.unit = unit
         self.block_image = image
         
-        super(Tetroid, self).__init__(name,pos,size=(3*self.unit,3*self.unit),color=color)
+        super(Tetroid, self).__init__(name,pos,color=color)
 
         self.blocks = [Block([pos[0]+offset[0]*unit,pos[1]+offset[1]*unit],color,unit,image=image) for offset in offsets]
-    
+        
     def set_pos(self, pos):
         '''Sets the position of the tetroid'''
         self._pos = pos
@@ -121,6 +124,11 @@ class Tetroid(sprite.Sprite):
         return self._rot
     
     rot = property(get_rot, set_rot)
+    
+    def get_size(self):
+        '''Gets the size of the tetroid'''
+        return (max(b.pos[0] for b in self.blocks) - min(b.pos[0] for b in self.blocks) + self.unit,
+                max(b.pos[1] for b in self.blocks) - min(b.pos[1] for b in self.blocks) + self.unit)
         
     def draw(self, canvas):
         '''Draws the tetroid'''
@@ -164,37 +172,32 @@ def no_overlaps_w_blocks(tetroid_blocks, move):
     '''Checks to see if the blocks movement will overlap a laid down block'''
     for block in tetroid_blocks:
         new_pos = (block.pos[0] + move[0], block.pos[1] + move[1])
-        for check_block in blocks:
+        for check_block in block_rows[int(new_pos[1]/block.size[1])]:
             if check_block.pos == new_pos:
                 return False
     return True
 
-def remove_completed_rows():
+def drop_blocks(tetroid):
+    '''Drops the blocks from the tetroid onto the board'''
+    for block in tetroid.blocks:
+        block_rows[int(block.pos[1]/block.size[1])].append(block)
+
+def completed_rows():
+    '''Return the completed row numbers'''
+    return [i for i, row in enumerate(block_rows) if len(row) == WIDTH/BLOCK_H]
+
+def remove_completed_rows(rows_to_remove):
     '''Removes any rows that are completed'''
-    rows_to_remove = []
-    if len(blocks)>0:
-        highest_row = min([block.get_top_edge() for block in blocks])
-        
-        
-        for i in range(int((HEIGHT - highest_row) / BLOCK_H + 1)):
-            row = [block for block in blocks if (HEIGHT-block.get_top_edge())/BLOCK_H==i]
-            
-            if len(row) == WIDTH/BLOCK_H:
-                rows_to_remove.append(i)
-                
-                for block in row:
-                    blocks.remove(block)
-    
-    
-        for block in blocks:
-            x, y = block.pos
-            del_y = BLOCK_H * len([i for i in rows_to_remove if (HEIGHT-block.get_top_edge())/BLOCK_H>i])
-            block.pos = [x,y+del_y]
-    return rows_to_remove
+    for i in rows_to_remove:
+        for row in block_rows[:i]:
+            for block in row:
+                block.pos = [block.pos[0], block.pos[1]+BLOCK_H]
+        block_rows.pop(i)
+        block_rows.insert(0,[])
 
 def increase_score(num_rows):
     '''Increase the score'''
-    global score, lines
+    global score, lines, high_score
     lines += num_rows
     lines_label.text = 'Lines: '+str(lines)
     
@@ -202,13 +205,20 @@ def increase_score(num_rows):
         num_rows *= 2
     score += num_rows*100
     score_label.text = 'Score: '+str(score)
+    if score > high_score:
+        high_score = score
+        high_score_label.text = 'High Score: '+str(high_score)
+    
         
 def draw(canvas):
     '''Draw the board'''
-    global cnt, game_over, current_tetroid
+    global cnt, game_over, current_tetroid, flashing_rows, flashes
     
     if not game_paused and not game_over:
-        cnt = (cnt + 1) % DROP
+        speed = DROP - (lines / 10)
+        if speed < 5:
+            speed = 5
+        cnt = (cnt + 1) % speed
         
         if cnt % 2 == 0:
             for control, state in control_state.iteritems():
@@ -226,7 +236,8 @@ def draw(canvas):
             old_pos = list(current_tetroid.pos)
             current_tetroid.move_down()
             if old_pos == current_tetroid.pos:
-                [blocks.append(block) for block in current_tetroid.blocks]
+                #[blocks.append(block) for block in current_tetroid.blocks]
+                drop_blocks(current_tetroid)
                 current_tetroid = next_tetroid()
                 
                 if not no_overlaps_w_blocks(current_tetroid.blocks,[0,0]):
@@ -234,12 +245,25 @@ def draw(canvas):
                     
         current_tetroid.draw(canvas)
     
-    removed_rows = remove_completed_rows()
-    increase_score(len(removed_rows))
+    if flashes == 0:
+        remove_completed_rows(flashing_rows)
+        increase_score(len(flashing_rows))
+        flashing_rows = []
     
-    for block in blocks:
-        block.draw(canvas)
-        
+    rows = completed_rows()
+    if any(r not in flashing_rows for r in rows):
+        flashing_rows = rows
+        flashes = 4*len(flashing_rows)
+    
+    
+    for row in block_rows:
+        for block in row:
+            block.draw(canvas)
+    
+    if (flashes / 2) % 2 == 0:
+        for i in flashing_rows:
+            canvas.draw_rect([0,i*BLOCK_H],[WIDTH,BLOCK_H],0,'White','White')
+    flashes -= 1
     if game_over:
         canvas.draw_rect([0.1*WIDTH,0.5*HEIGHT-BLOCK_H],[0.8*WIDTH,2*BLOCK_H],0,'Grey','Grey')
         canvas.draw_text('GAME OVER',[WIDTH/2,HEIGHT/2],40,'White',align=('center','middle'))
@@ -264,14 +288,19 @@ def next_tetroid():
     
 def new_game():
     '''Clears the board and starts a new game'''
-    global blocks, game_over, game_paused, current_tetroid
+    global block_rows, game_over, game_paused, current_tetroid, flashing_rows, flashes, score, lines
     
-    blocks = []
+    block_rows = [[] for i in range(int(HEIGHT/BLOCK_H))]
+    flashing_rows = []
+    flashes = 0
     
     game_over = False
     game_paused = False
     
     current_tetroid = next_tetroid()
+    
+    score = 0
+    lines = 0
     
 
 def key_down(key):
@@ -303,8 +332,8 @@ def pause():
     
 def setup():
     '''Setup the frame and event handlers'''
-    global frame, next_container, score_label, lines_label, images
-    frame = simplegui.Frame('Tetris',(WIDTH,HEIGHT),200)
+    global frame, next_container, score_label, lines_label, high_score_label, images
+    frame = simplegui.Frame('Tetris',(WIDTH,HEIGHT),160)
     frame.set_draw_handler(draw)
     frame.set_key_down_handler(key_down)
     frame.set_key_up_handler(key_up)
@@ -316,14 +345,15 @@ def setup():
     
     #Build the control panel
     frame.add_label('')
-    next_container = frame.control_panel.add_sprite_container(new_tetroid())
+    next_container = frame.control_panel.add_sprite_container(new_tetroid(),size=(3*BLOCK_H,3*BLOCK_H))
     score_label = frame.add_label('Score: 0')
     lines_label = frame.add_label('Lines: 0')
     frame.add_label('')
-    frame.add_label('Pause: space')
-    frame.add_label('New Game: return')
-    frame.add_label('Rotate: a,s')
-    frame.add_label('Move: arrows')
+    high_score_label = frame.add_label('High Score: 0')
+#     frame.add_label('Pause: space')
+#     frame.add_label('New Game: return')
+#     frame.add_label('Rotate: a,s')
+#     frame.add_label('Move: arrows')
     
     
     if SCREEN_SHOT_FILE:
