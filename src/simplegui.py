@@ -8,7 +8,6 @@ Created on Jun 7, 2014
 @author: Robb
 '''
 
-import os
 import pygame
 
 if not pygame.font: print('Warning, fonts disabled')
@@ -54,7 +53,8 @@ class Frame(object):
         Creates the frame
         '''
         self.running = False
-        self.screen = pygame.display.set_mode((size[0]+control_panel_width,size[1]))
+        self.title = title
+        #self.screen = pygame.display.set_mode((size[0]+control_panel_width,size[1]))
         self.canvas_size = size
         self.control_panel_size = (control_panel_width,size[1])
         self.canvas = Canvas(size,color=canvas_color)
@@ -69,7 +69,7 @@ class Frame(object):
         
         #self.controls = []
         
-        pygame.display.set_caption(title)
+        #pygame.display.set_caption(title)
         self.FPS = fps
         
         self.draw_handler = None
@@ -81,14 +81,26 @@ class Frame(object):
         
         self.surface_count = 0
         
+        self.setup_screen()
+        
+    def setup_screen(self):
+        '''Sets up the screen'''
+        self.screen = pygame.display.set_mode((self.canvas_size[0]+self.control_panel_size[0],self.canvas_size[1]))
+        pygame.display.set_caption(self.title)
+        
     def start(self):
         '''Starts the frame'''
+        self.setup_screen()
         self.running = True
         self.run()
         
     def stop(self):
         '''Stops the frame'''
         self.running = False
+        
+    def quit(self):
+        '''Quits pygame (quitting all windows)'''
+        pygame.quit()
         
     def set_draw_handler(self, draw_handler):
         '''Sets the draw handler for the frame'''
@@ -215,7 +227,7 @@ class Frame(object):
             # it micro pauses so while loop only runs 60 times a second max.
             clock.tick(self.FPS)
             
-        pygame.quit()
+        #pygame.quit()
     
     def __repr__(self):
         '''Returns the class of the object and its fields'''
@@ -386,6 +398,7 @@ class ControlPanel(Canvas):
             
     def click_handler(self, click_pos):
         '''Calls the control that was clicked on by a position'''
+        print click_pos
         [control.call_handler() for control in self.controls if type(control) == Button and control.click_check(click_pos)]
     
     def __repr__(self):
@@ -395,13 +408,14 @@ class ControlPanel(Canvas):
 class Button(object):
     '''Creates a button.'''
     
-    def __init__(self, text, handler, pos, width, font_height):
+    def __init__(self, text, handler, pos, width, font_height, color = 'grey'):
         '''Initializes the button'''
         self.text = text
         self.handler = handler
         self.pos = pos
         self.font_h = font_height
         self.size = (width, 2*self.font_h)
+        self.color = color
     
     def call_handler(self):
         '''Calls the button's event handler'''
@@ -410,12 +424,12 @@ class Button(object):
             
     def draw(self, canvas):
         '''Draws the button'''
-        canvas.draw_rect((self.pos[0]-self.size[0]/2,self.pos[1]), self.size, 1, 'black', 'grey')
+        canvas.draw_rect((self.pos[0]-self.size[0]/2,self.pos[1]), self.size, 1, 'black', self.color)
         canvas.draw_text(self.text, (self.pos[0],self.pos[1]+self.size[1]/2), self.font_h, 'black', 'sans-serif', ('center','middle'))
     
     def click_check(self, click_pos):
         '''Checks to see if the button was clicked on by a position'''
-        return 0 <= click_pos[0] - self.pos[0] <= self.size[0] and 0 <= click_pos[1] - self.pos[1] <= self.size[1]
+        return -self.size[0]/2 <= click_pos[0] - self.pos[0] <= self.size[0]/2 and 0 <= click_pos[1] - self.pos[1] <= self.size[1]
        
     def __repr__(self):
         '''Returns the class of the object and its fields'''
@@ -480,6 +494,7 @@ class Sprite_Container(object):
     def __repr__(self):
         '''Returns the class of the object and its fields'''
         return '%s(%r)' % (self.__class__, self.__dict__)
+    
 class Sound(object):
     '''Creates a sound file, currently placeholder'''
     
@@ -559,5 +574,5 @@ if __name__ == '__main__':
     
     frame.set_draw_handler(draw)
     frame.start()#nothing can come after frame.start()
-    
+    frame.quit()
     

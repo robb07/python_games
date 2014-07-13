@@ -22,7 +22,7 @@ UNIT = 40
 MOVE_COUNT = 30
 BACKGROUND_COLOR = 'SteelBlue'
 FOOD_COLOR = 'White'
-IMAGES_ON = False
+IMAGES_ON = True
 
 game_over = False
 game_paused = False
@@ -147,18 +147,23 @@ class Snake(object):
         else:
             return False
     
-    def is_on(self, pos):
+    def is_on(self, other_sprite):
         '''Checks to see if the any part of the snake is on the position'''
-        if self.head.pos == pos:
+#         if self.head.pos == pos:
+#             return True
+#         if self.tail and self.tail.pos == pos:
+#             return True
+#         return any([seg.pos==pos for seg in self.body])
+        if self.head.overlaps(other_sprite):
             return True
-        if self.tail and self.tail.pos == pos:
+        if self.tail and self.tail.overlaps(other_sprite):
             return True
-        return any([seg.pos==pos for seg in self.body])
+        return any(seg.overlaps(other_sprite) for seg in self.body)
     
 def new_food():
     '''Put new food down'''
     food_pos = rand_pos()
-    while snake.is_on(food_pos):
+    while snake.is_on(sprite.Sprite(pos=food_pos,size=[UNIT,UNIT])):
         food_pos = rand_pos()
     return sprite.Sprite('food',food_pos,[0,0],0,[UNIT,UNIT],FOOD_COLOR,line_color=FOOD_COLOR,draw_method=sprite.draw_circle,image=images['food'])
 
@@ -182,6 +187,8 @@ def key_up(key):
     global game_paused
     if key == 'space':
         game_paused = not game_paused
+    elif key == 'return':
+        new_game()
 
 def mouse_click(pos):
     '''Mouse click handler'''
@@ -236,9 +243,12 @@ def setup():
         
     if SCREEN_SHOT_FILE:
         frame.set_screen_shot_file(SCREEN_SHOT_FILE)
+        
+    return frame
 
 if __name__ == '__main__':
     setup()
     
     new_game()
     frame.start()
+    frame.quit()

@@ -38,7 +38,7 @@ swapping_count = 0.
 SWAP_STOP = 10.
 
 # helper functions
-def new_board():
+def new_game():
     '''Creates a new board'''
     global tiles, board
     
@@ -141,7 +141,7 @@ def shuffle_button():
 
 def reset_button():
     '''Resets the board'''
-    new_board()
+    new_game()
 
 def click(pos):
     '''Finds the tile to move'''
@@ -152,14 +152,16 @@ def click(pos):
 
 def key_up(key):
     '''Presses the buttons using the keyboard'''
-    if key == 'r':
-        reset_button()
-    elif key == 's':
+    if key == 's':
         shuffle_button()
+    elif key == 'return':
+        new_game()
 
-if __name__ == '__main__':
+def setup():
+    '''Setup the game'''
+    global frame
+    
     # create frame
-
     frame = simplegui.Frame('Fifteen',(CANVAS_W, CANVAS_H),BUTTON_W)
     
     # register event handlers
@@ -169,6 +171,11 @@ if __name__ == '__main__':
     frame.set_key_up_handler(key_up)
     frame.set_mouse_left_click_handler(click)
     
-    new_board()
-    frame.start()
+    return frame
     
+if __name__ == '__main__':
+    setup()
+    
+    new_game()
+    frame.start()
+    frame.quit()

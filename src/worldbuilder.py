@@ -91,7 +91,8 @@ def setup():
     
     
     images = dict([(key, simplegui.Image(image_info)) for key, image_info in image_infos.iteritems()])
-    
+    return frame
+
 def new_world():
     '''Makes a new world'''
     global the_world
@@ -106,3 +107,4 @@ if __name__ == '__main__':
     
     new_world()
     frame.start()
+    frame.quit()

@@ -291,6 +291,10 @@ def keyup(key):
     """ Record players commands to stop the paddles. """
     for paddle in paddles:
         paddle.key_press(key, False)
+    if key == 'space':
+        pause()
+    elif key == 'return':
+        new_game()
 
 def plyr1_toggle():
     """ Switch between player 1 being controlled by human and computer """
@@ -310,7 +314,7 @@ def plyr2_toggle():
         plyr2_button.text ="Player 2: Human"
         paddles[1].set_human(True)
 
-def pause_game():
+def pause():
     """ Pause or unpause the game. """
     global game_paused
     game_paused = not game_paused
@@ -344,7 +348,7 @@ def setup():
     
     frame.add_label(" ")
     frame.add_button("Restart",new_game, 0.9*BUTTON_W, BUTTON_FONT_H)
-    frame.add_button("Pause",pause_game, 0.9*BUTTON_W, BUTTON_FONT_H)
+    frame.add_button("Pause",pause, 0.9*BUTTON_W, BUTTON_FONT_H)
     
     #frame.add_label(" ")
     frame.add_label("Player 1: w up, s down")
@@ -364,10 +368,12 @@ def setup():
     sound_peeeeeep = simplegui.Sound('https://dl.dropboxusercontent.com/u/22969407/sounds_ping_pong_8bit/ping_pong_8bit_peeeeeep.ogg')
     sound_plop = simplegui.Sound('https://dl.dropboxusercontent.com/u/22969407/sounds_ping_pong_8bit/ping_pong_8bit_plop.ogg')
     
+    return frame
+
 if __name__ == '__main__':
     setup()
     
     # start frame
     new_game()
     frame.start()
-    
+    frame.quit()

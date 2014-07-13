@@ -37,8 +37,8 @@ TETROID_OFFSET_DICT = dict([('square',  (( 0,0),(0,1),(1,0),(1,1))),
                            ('zig-zag 1',((-1,0),(0,0),(0,1),(1,1))),
                            ('zig-zag 2',((-1,1),(0,0),(0,1),(1,0))),
                            ('tee',      ((-1,0),(0,0),(0,1),(1,0))),
-                           ('L1',       ((-1,0),(0,0),(0,1),(0,2))),
-                           ('L2',       (( 1,0),(0,0),(0,1),(0,2))),
+                           ('L1',       ((-1, 1),(-1,0),(0,0),(1,0))),
+                           ('L2',       ((-1,-1),(-1,0),(0,0),(1,0))),
                            ('line',     ((-1,0),(0,0),(1,0),(2,0)))])
 
 TETROID_COLOR_DICT = dict([('square','FireBrick'),
@@ -216,8 +216,8 @@ def draw(canvas):
     
     if not game_paused and not game_over:
         speed = DROP - (lines / 10)
-        if speed < 5:
-            speed = 5
+        if speed < 1:
+            speed = 1
         cnt = (cnt + 1) % speed
         
         if cnt % 2 == 0:
@@ -236,10 +236,10 @@ def draw(canvas):
             old_pos = list(current_tetroid.pos)
             current_tetroid.move_down()
             if old_pos == current_tetroid.pos:
-                #[blocks.append(block) for block in current_tetroid.blocks]
+                
                 drop_blocks(current_tetroid)
                 current_tetroid = next_tetroid()
-                
+                 
                 if not no_overlaps_w_blocks(current_tetroid.blocks,[0,0]):
                     game_over = True
                     
@@ -282,7 +282,7 @@ def new_tetroid():
 def next_tetroid():
     '''Sets the preview pane to the new tetroid and puts the previewed tetroid on the board'''
     tetroid = next_container.sprite
-    tetroid.pos = [0.5*BLOCK_H+WIDTH/2,0.5*BLOCK_H]
+    tetroid.pos = [0.5*BLOCK_H+WIDTH/2,1.5*BLOCK_H]
     next_container.sprite = new_tetroid()
     return tetroid
     
@@ -290,7 +290,7 @@ def new_game():
     '''Clears the board and starts a new game'''
     global block_rows, game_over, game_paused, current_tetroid, flashing_rows, flashes, score, lines
     
-    block_rows = [[] for i in range(int(HEIGHT/BLOCK_H))]
+    block_rows = [[] for _ in range(int(HEIGHT/BLOCK_H))]
     flashing_rows = []
     flashes = 0
     
@@ -313,7 +313,7 @@ def key_up(key):
     '''Handles the key up events'''
     if control_state.has_key(key):
         control_state[key] = False
-    elif key == 'a':
+    elif key == 'a' or key == 'up':
         if not game_paused:
             current_tetroid.rotate(-1)
     elif key == 's':
@@ -345,22 +345,23 @@ def setup():
     
     #Build the control panel
     frame.add_label('')
+    frame.add_label('')
     next_container = frame.control_panel.add_sprite_container(new_tetroid(),size=(3*BLOCK_H,3*BLOCK_H))
     score_label = frame.add_label('Score: 0')
     lines_label = frame.add_label('Lines: 0')
     frame.add_label('')
     high_score_label = frame.add_label('High Score: 0')
-#     frame.add_label('Pause: space')
-#     frame.add_label('New Game: return')
-#     frame.add_label('Rotate: a,s')
-#     frame.add_label('Move: arrows')
+
     
     
     if SCREEN_SHOT_FILE:
         frame.set_screen_shot_file(SCREEN_SHOT_FILE)
+        
+    return frame
 
 if __name__ == '__main__':
     setup()
     
     new_game()
     frame.start()
+    frame.quit()

@@ -12,7 +12,7 @@ class Sprite(object):
     Sprite object for drawing and moving around the game canvas
     '''
 
-    def __init__(self, name=None, pos=[0,0], vel=[0,0], rot=0, size=(10,10), color='White', line_color='Black', line_width=1, image=None, draw_method=None, update_method=None):
+    def __init__(self, name=None, pos=[0,0], vel=[0,0], rot=0, size=(10,10), color='White', line_color='Black', line_width=1, life=None, image=None, draw_method=None, update_method=None):
         '''
         Constructor
         '''
@@ -24,9 +24,11 @@ class Sprite(object):
         self.color = color
         self.line_color = line_color
         self.line_width = line_width
+        self.life = life
         self.image = image
         self.draw_method = draw_method
         self.update_method = update_method
+        
         
     def set_pos(self, pos):
         '''Sets the position of the sprite'''
@@ -90,6 +92,9 @@ class Sprite(object):
             self.update_method(self, world_size)
         else:
             self.move(self.vel)
+        
+        if self.life is not None:
+            self.life -= 1
             
         
     def draw(self, canvas, default=False):
@@ -117,6 +122,10 @@ class Sprite(object):
         '''Returns the x,y gap between the two sprites'''
         return [abs(p1-p2) - 0.5*(s1+s2) for p1, s1, p2, s2 in zip(self.pos, self.size, other_sprite.pos, other_sprite.size)]
     
+    def rel_velocity(self, other_sprite):
+        '''Returns the relative velocity between the sprites'''
+        return [v1 - v2 for v1, v2 in zip(self.vel, other_sprite.vel)]
+    
     def overlaps(self, other_sprite):
         '''Returns true if the two sprites overlap'''
         return all([g < 0 for g in self.gap_between(other_sprite)])
@@ -129,10 +138,27 @@ def draw_circle(circle, canvas):
     '''draws a circle'''
     canvas.draw_circle(circle.pos,circle.size[0]/2,circle.line_width,circle.line_color,circle.color)
 
+def draw_name(sprite, canvas):
+    '''draws the name of the sprite on the canvas'''
+    canvas.draw_text(sprite.name, sprite.pos, sprite.size[1], sprite.color, align=('center','middle'))
+
 def update_bounce(the_sprite, world_size):
     '''Bounces off the edge of the world'''
     the_sprite.move(the_sprite.vel)
-    the_sprite.vel = [abs(v) if (p-0.5*s < 0) else (-abs(v) if (p+0.5*s > w) else v) for p, v, s, w in zip(the_sprite.pos, the_sprite.vel, the_sprite.size, world_size)]
+    #the_sprite.vel = [abs(v) if (p-0.5*s < 0) else (-abs(v) if (p+0.5*s > w) else v) for p, v, s, w in zip(the_sprite.pos, the_sprite.vel, the_sprite.size, world_size)]
+#     new_v = []
+#     for p, v, s, w in zip(the_sprite.pos, the_sprite.vel, the_sprite.size, world_size):
+#         
+#         if check_bounce(p-0.5*s, v) or check_bounce(w-p-0.5*s, -v):
+#             n = -v
+#         else:
+#             n = v        
+#         new_v.append(n)
+#     the_sprite.vel = new_v
+    
+    the_sprite.vel = [-v if check_bounce(p-0.5*s, v) or check_bounce(w-p-0.5*s, -v) else v
+                       for p, v, s, w in zip(the_sprite.pos, the_sprite.vel, the_sprite.size, world_size)]
+    
 
 def update_toroid(the_sprite, world_size):
     '''Treats the world as a 2D toroid'''
@@ -145,4 +171,6 @@ def update_stay_in_world(the_sprite, world_size):
     the_sprite.vel = stay_in_vel
     the_sprite.move(the_sprite.vel)
     
-    
+def check_bounce(rel_dist, rel_v):
+    '''Determines if a bounce should happen (one dimensional)'''
+    return rel_dist < 0 and rel_v < 0
