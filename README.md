@@ -10,6 +10,7 @@ List of Games
 
 Here are the games in the repository:
 
+0. Menu for calling the other games
 1. Fifteen Tile Puzzle
 2. Pong
 3. Tetris
