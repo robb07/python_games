@@ -37,6 +37,8 @@ swapping_space = None
 swapping_count = 0.
 SWAP_STOP = 10.
 
+controls = dict([('left',(1,0)),('right',(-1,0)),('down',(0,-1)),('up',(0,1))])
+
 # helper functions
 def new_game():
     '''Creates a new board'''
@@ -77,7 +79,7 @@ def get_blank_space():
     return blank[0]
 
 def move_tile(space):
-    '''Moves a tile be swapping it with the blank space'''
+    '''Moves a tile by swapping it with the blank space'''
     global swapping_space
     if space in SPACES:
         blank = get_blank_space()
@@ -88,7 +90,14 @@ def move_tile(space):
                 swapping_space = blank
                 board[space], board[blank] = board[blank], board[space]
             
-
+def control_move_tile(control):
+    '''Moves a tile by swapping it with the blank space, chosen by keyboard'''
+    global swapping_space
+    blank = get_blank_space()
+#     print 'blank', blank
+    #space = chr(ord(blank[0]) + controls[control][0]) + chr(ord(blank[1]) + controls[control][1])
+    space = ''.join([chr(ord(b) + c) for b, c in zip(blank, controls[control])])
+    move_tile(space)
 # event handlers
 def draw(canvas):
     '''Draws the canvas'''
@@ -146,7 +155,7 @@ def reset_button():
 def click(pos):
     '''Finds the tile to move'''
     space = get_space(pos)
-    
+    print space
     if space:
         move_tile(space)
 
@@ -156,6 +165,8 @@ def key_up(key):
         shuffle_button()
     elif key == 'return':
         new_game()
+    elif controls.has_key(key):
+        control_move_tile(key)
 
 def setup():
     '''Setup the game'''
