@@ -35,7 +35,7 @@ LETTER_COLOR = dict({0:'Ivory', 1:'FireBrick'})
 
 swapping_space = None
 swapping_count = 0.
-SWAP_STOP = 10.
+SWAP_STOP = 5.
 
 controls = dict([('left',(1,0)),('right',(-1,0)),('down',(0,-1)),('up',(0,1))])
 
@@ -94,8 +94,6 @@ def control_move_tile(control):
     '''Moves a tile by swapping it with the blank space, chosen by keyboard'''
     global swapping_space
     blank = get_blank_space()
-#     print 'blank', blank
-    #space = chr(ord(blank[0]) + controls[control][0]) + chr(ord(blank[1]) + controls[control][1])
     space = ''.join([chr(ord(b) + c) for b, c in zip(blank, controls[control])])
     move_tile(space)
 # event handlers
@@ -155,7 +153,7 @@ def reset_button():
 def click(pos):
     '''Finds the tile to move'''
     space = get_space(pos)
-    print space
+    
     if space:
         move_tile(space)
 
