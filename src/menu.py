@@ -6,12 +6,12 @@ Created on Jul 12, 2014
 @author: Robb
 '''
 
-import simplegui
-import fifteen
-import breakout
-import pong
-import snake
-import tetris
+from game_tools import simplegui
+from games import fifteen
+from games import breakout
+from games import pong
+from games import snake
+from games import tetris
 
 HEIGHT = 400
 CONTROL_WIDTH = 200

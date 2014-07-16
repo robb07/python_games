@@ -145,16 +145,6 @@ def draw_name(sprite, canvas):
 def update_bounce(the_sprite, world_size):
     '''Bounces off the edge of the world'''
     the_sprite.move(the_sprite.vel)
-    #the_sprite.vel = [abs(v) if (p-0.5*s < 0) else (-abs(v) if (p+0.5*s > w) else v) for p, v, s, w in zip(the_sprite.pos, the_sprite.vel, the_sprite.size, world_size)]
-#     new_v = []
-#     for p, v, s, w in zip(the_sprite.pos, the_sprite.vel, the_sprite.size, world_size):
-#         
-#         if check_bounce(p-0.5*s, v) or check_bounce(w-p-0.5*s, -v):
-#             n = -v
-#         else:
-#             n = v        
-#         new_v.append(n)
-#     the_sprite.vel = new_v
     
     the_sprite.vel = [-v if check_bounce(p-0.5*s, v) or check_bounce(w-p-0.5*s, -v) else v
                        for p, v, s, w in zip(the_sprite.pos, the_sprite.vel, the_sprite.size, world_size)]

@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 '''
-Creates a prototype game like simplegui from codeskulptor.
+Creates a prototype game like game_tools from codeskulptor.
 Source: http://commondatastorage.googleapis.com/codeskulptor-demos/CS_to_PyGame.html
 
 Created on Jun 7, 2014

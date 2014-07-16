@@ -398,8 +398,9 @@ class ControlPanel(Canvas):
             
     def click_handler(self, click_pos):
         '''Calls the control that was clicked on by a position'''
-        print click_pos
-        [control.call_handler() for control in self.controls if type(control) == Button and control.click_check(click_pos)]
+        for control in self.controls:
+            if type(control) == Button and control.click_check(click_pos):
+                control.call_handler()
     
     def __repr__(self):
         '''Returns the class of the object and its fields'''

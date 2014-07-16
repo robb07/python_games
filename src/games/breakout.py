@@ -7,8 +7,8 @@ Created on Jun 28, 2014
 @author: Robb
 '''
 
-import simplegui
-import sprite
+from game_tools import simplegui
+from game_tools import sprite
 import random
 import math
 
