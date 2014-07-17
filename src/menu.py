@@ -12,6 +12,7 @@ from games import breakout
 from games import pong
 from games import snake
 from games import tetris
+from games import cryptoquip
 
 HEIGHT = 400
 CONTROL_WIDTH = 200
@@ -34,7 +35,7 @@ def fifteen_starter():
     game_starter(fifteen)
 
 def pong_starter():
-    '''Starts the tetris game'''
+    '''Starts the pong game'''
     game_starter(pong)
 
 def tetris_starter():
@@ -42,13 +43,17 @@ def tetris_starter():
     game_starter(tetris)
 
 def snake_starter():
-    '''Starts the fifteen game'''
+    '''Starts the snake game'''
     game_starter(snake)
 
 def breakout_starter():
-    '''Starts the tetris game'''
+    '''Starts the breakout game'''
     game_starter(breakout)
 
+def cryptoquip_starter():
+    '''Starts the cryptoquip game'''
+    game_starter(cryptoquip)
+    
 def key_up(key):
     '''Handles the key up events'''
     if key == 'down' or key =='right':
@@ -85,6 +90,7 @@ def setup():
     buttons.append(frame.add_button('Tetris', tetris_starter, BUTTON_WIDTH, BUTTON_FONT_SIZE))
     buttons.append(frame.add_button('Snake', snake_starter, BUTTON_WIDTH, BUTTON_FONT_SIZE))
     buttons.append(frame.add_button('Breakout', breakout_starter, BUTTON_WIDTH, BUTTON_FONT_SIZE))
+    buttons.append(frame.add_button('Cryptoquip', cryptoquip_starter, BUTTON_WIDTH, BUTTON_FONT_SIZE))
     
     return frame
 
