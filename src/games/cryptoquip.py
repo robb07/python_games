@@ -8,7 +8,7 @@ from game_tools import simplegui
 import string
 import random
 
-MESSAGES_FILE = '../../lib/quips.txt'
+MESSAGES_FILE = '../lib/quips.txt'
 
 WIDTH = 800
 HEIGHT = 850
