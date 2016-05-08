@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 '''
 Opens up a world as a canvas to place objects
 
@@ -16,13 +17,13 @@ HEIGHT = 600
 BACKGROUND_COLORS = simplegui.BACKGROUND_COLORS
 
 BLOCK_H = 30
-image_infos = dict([('dark_blue',simplegui.Image_Info('../lib/images/block_dark_blue.png',(BLOCK_H,BLOCK_H))),
-                    ('light_blue',simplegui.Image_Info('../lib/images/block_light_blue.png',(BLOCK_H,BLOCK_H))),
-                    ('red',simplegui.Image_Info('../lib/images/block_red.png',(BLOCK_H,BLOCK_H))),
-                    ('green',simplegui.Image_Info('../lib/images/block_green.png',(BLOCK_H,BLOCK_H))),
-                    ('yellow',simplegui.Image_Info('../lib/images/block_yellow.png',(BLOCK_H,BLOCK_H))),
-                    ('purple',simplegui.Image_Info('../lib/images/block_purple.png',(BLOCK_H,BLOCK_H))),
-                    ('orange',simplegui.Image_Info('../lib/images/block_orange.png',(BLOCK_H,BLOCK_H)))])
+image_infos = dict([('dark_blue',simplegui.Image_Info(simplegui.get_image_path('block_dark_blue.png'),(BLOCK_H,BLOCK_H))),
+                    ('light_blue',simplegui.Image_Info(simplegui.get_image_path('block_light_blue.png'),(BLOCK_H,BLOCK_H))),
+                    ('red',simplegui.Image_Info(simplegui.get_image_path('block_red.png'),(BLOCK_H,BLOCK_H))),
+                    ('green',simplegui.Image_Info(simplegui.get_image_path('block_green.png'),(BLOCK_H,BLOCK_H))),
+                    ('yellow',simplegui.Image_Info(simplegui.get_image_path('block_yellow.png'),(BLOCK_H,BLOCK_H))),
+                    ('purple',simplegui.Image_Info(simplegui.get_image_path('block_purple.png'),(BLOCK_H,BLOCK_H))),
+                    ('orange',simplegui.Image_Info(simplegui.get_image_path('block_orange.png'),(BLOCK_H,BLOCK_H)))])
 images = dict([])
 
 cursor = None

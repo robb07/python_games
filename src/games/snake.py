@@ -12,8 +12,7 @@ from game_tools import simplegui
 from game_tools import sprite
 import random
 
-#SCREEN_SHOT_FILE = None
-SCREEN_SHOT_FILE = "E:/Documents/projects/python_programs/30 days/snake/snake_screen_shot"
+SCREEN_SHOT_FILE = None
 AUTO_SCREEN_SHOT = False
 
 WIDTH = 600
@@ -30,13 +29,13 @@ move_count = 0
 snake = None
 food = None
 
-image_infos = dict([('head',simplegui.Image_Info('../lib/images/snake_head.png',(UNIT,UNIT))),
-                    ('neck',simplegui.Image_Info('../lib/images/snake_neck.png',(UNIT,UNIT))),
-                    ('straight',simplegui.Image_Info('../lib/images/snake_body_straight.png',(UNIT,UNIT))),
-                    ('left',simplegui.Image_Info('../lib/images/snake_body_left.png',(UNIT,UNIT))),
-                    ('right',simplegui.Image_Info('../lib/images/snake_body_right.png',(UNIT,UNIT))),
-                    ('tail',simplegui.Image_Info('../lib/images/snake_tail.png',(UNIT,UNIT))),
-                    ('food',simplegui.Image_Info('../lib/images/snake_food.png',(UNIT,UNIT)))])
+image_infos = dict([('head',simplegui.Image_Info(simplegui.get_image_path('snake_head.png'),(UNIT,UNIT))),
+                    ('neck',simplegui.Image_Info(simplegui.get_image_path('snake_neck.png'),(UNIT,UNIT))),
+                    ('straight',simplegui.Image_Info(simplegui.get_image_path('snake_body_straight.png'),(UNIT,UNIT))),
+                    ('left',simplegui.Image_Info(simplegui.get_image_path('snake_body_left.png'),(UNIT,UNIT))),
+                    ('right',simplegui.Image_Info(simplegui.get_image_path('snake_body_right.png'),(UNIT,UNIT))),
+                    ('tail',simplegui.Image_Info(simplegui.get_image_path('snake_tail.png'),(UNIT,UNIT))),
+                    ('food',simplegui.Image_Info(simplegui.get_image_path('snake_food.png'),(UNIT,UNIT)))])
 images = dict([])
 
 

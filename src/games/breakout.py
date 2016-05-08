@@ -12,8 +12,7 @@ from game_tools import sprite
 import random
 import math
 
-#SCREEN_SHOT_FILE = None
-SCREEN_SHOT_FILE = "E:/Documents/projects/python_programs/30 days/breakout/breakout_screen_shot"
+SCREEN_SHOT_FILE = None
 AUTO_SCREEN_SHOT = False
 
 BRICK_H = 25

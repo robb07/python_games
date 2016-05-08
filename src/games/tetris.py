@@ -9,8 +9,7 @@ from game_tools import simplegui
 from game_tools import sprite
 import random
 
-#SCREEN_SHOT_FILE = None
-SCREEN_SHOT_FILE = "E:/Documents/projects/python_programs/30 days/tetris/tetris_screen_shot"
+SCREEN_SHOT_FILE = None
 AUTO_SCREEN_SHOT = False
 
 BLOCK_H = 30
@@ -49,13 +48,13 @@ TETROID_COLOR_DICT = dict([('square','FireBrick'),
                            ('L2',(220,94,56)),
                            ('line','SkyBlue')])
 
-image_infos = dict([('dark_blue',simplegui.Image_Info('../lib/images/block_dark_blue.png',(BLOCK_H,BLOCK_H))),
-                    ('light_blue',simplegui.Image_Info('../lib/images/block_light_blue.png',(BLOCK_H,BLOCK_H))),
-                    ('red',simplegui.Image_Info('../lib/images/block_red.png',(BLOCK_H,BLOCK_H))),
-                    ('green',simplegui.Image_Info('../lib/images/block_green.png',(BLOCK_H,BLOCK_H))),
-                    ('yellow',simplegui.Image_Info('../lib/images/block_yellow.png',(BLOCK_H,BLOCK_H))),
-                    ('purple',simplegui.Image_Info('../lib/images/block_purple.png',(BLOCK_H,BLOCK_H))),
-                    ('orange',simplegui.Image_Info('../lib/images/block_orange.png',(BLOCK_H,BLOCK_H)))])
+image_infos = dict([('dark_blue',simplegui.Image_Info(simplegui.get_image_path('block_dark_blue.png'),(BLOCK_H,BLOCK_H))),
+                    ('light_blue',simplegui.Image_Info(simplegui.get_image_path('block_light_blue.png'),(BLOCK_H,BLOCK_H))),
+                    ('red',simplegui.Image_Info(simplegui.get_image_path('block_red.png'),(BLOCK_H,BLOCK_H))),
+                    ('green',simplegui.Image_Info(simplegui.get_image_path('block_green.png'),(BLOCK_H,BLOCK_H))),
+                    ('yellow',simplegui.Image_Info(simplegui.get_image_path('block_yellow.png'),(BLOCK_H,BLOCK_H))),
+                    ('purple',simplegui.Image_Info(simplegui.get_image_path('block_purple.png'),(BLOCK_H,BLOCK_H))),
+                    ('orange',simplegui.Image_Info(simplegui.get_image_path('block_orange.png'),(BLOCK_H,BLOCK_H)))])
 images = dict([])
 
 TETROID_IMAGE_COLOR_DICT = dict([('square','red'),

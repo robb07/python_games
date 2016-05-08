@@ -9,6 +9,14 @@ Created on Jun 7, 2014
 '''
 
 import pygame
+import os
+
+PACKAGE_DIRECTORY = os.path.dirname(os.path.abspath(__file__))
+IMAGE_DIRECTORY = os.path.abspath(os.path.join(PACKAGE_DIRECTORY, '..', '..', 'lib', 'images'))
+
+def get_image_path(filename):
+    '''Gets the full path to the image from the image library'''
+    return os.path.join(IMAGE_DIRECTORY, filename)
 
 if not pygame.font: print('Warning, fonts disabled')
 if not pygame.mixer: print('Warning, sound disabled')
@@ -553,7 +561,7 @@ class Image(object):
 if __name__ == '__main__':
     global image1
     
-    image_info1 = Image_Info('../lib/images/medium_gear.png', (400,400)) 
+    image_info1 = Image_Info(get_image_path('medium_gear.png'), (400,400)) 
     def print_event(name, event_info):
         print name, event_info
         

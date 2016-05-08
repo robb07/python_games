@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 '''
 Menu for picking the game to play.
 

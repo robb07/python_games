@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 '''
 Created on Jul 16, 2014
 
@@ -7,8 +8,10 @@ Created on Jul 16, 2014
 from game_tools import simplegui
 import string
 import random
+import os
 
-MESSAGES_FILE = '../lib/quips.txt'
+PACKAGE_DIRECTORY = os.path.dirname(os.path.abspath(__file__))
+MESSAGES_FILE = os.path.abspath(os.path.join(PACKAGE_DIRECTORY, '..', '..', 'lib', 'quips.txt'))
 
 WIDTH = 800
 HEIGHT = 850
