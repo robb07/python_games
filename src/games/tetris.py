@@ -8,6 +8,12 @@ Created on Jun 9, 2014
 from game_tools import simplegui
 from game_tools import sprite
 import random
+import os
+
+HISTORY_DIR = os.path.join(os.path.expanduser("~"),".python_games")
+if not os.path.exists(HISTORY_DIR):
+    os.makedirs(HISTORY_DIR)
+TETRIS_HISTORY = os.path.join(HISTORY_DIR, "tetris")
 
 SCREEN_SHOT_FILE = None
 AUTO_SCREEN_SHOT = False
@@ -28,7 +34,15 @@ block_rows = []
 current_tetroid = None
 score = 0
 lines = 0
-high_score = 0
+
+if os.path.exists(TETRIS_HISTORY):
+    try:
+        with open(TETRIS_HISTORY, 'r') as f_in:
+            high_score = int(f_in.next().strip())
+    except Exception as e:
+        high_score = 0
+else:
+    high_score = 0
 
 control_state = dict([('left',False),('right',False),('down',False)])
 
@@ -206,6 +220,8 @@ def increase_score(num_rows):
     score_label.text = 'Score: '+str(score)
     if score > high_score:
         high_score = score
+        with open(TETRIS_HISTORY, 'w') as f_out:
+            f_out.write(str(high_score))
     high_score_label.text = 'High Score: '+str(high_score)
     
         
@@ -349,7 +365,7 @@ def setup():
     score_label = frame.add_label('Score: 0')
     lines_label = frame.add_label('Lines: 0')
     frame.add_label('')
-    high_score_label = frame.add_label('High Score: 0')
+    high_score_label = frame.add_label('High Score: ' + str(high_score))
 
     
     
