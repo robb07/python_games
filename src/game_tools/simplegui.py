@@ -13,10 +13,15 @@ import os
 
 PACKAGE_DIRECTORY = os.path.dirname(os.path.abspath(__file__))
 IMAGE_DIRECTORY = os.path.abspath(os.path.join(PACKAGE_DIRECTORY, '..', '..', 'lib', 'images'))
+SOUND_DIRECTORY = os.path.abspath(os.path.join(PACKAGE_DIRECTORY, '..', '..', 'lib', 'sounds'))
 
 def get_image_path(filename):
     '''Gets the full path to the image from the image library'''
     return os.path.join(IMAGE_DIRECTORY, filename)
+
+def get_sound_path(filename):
+    '''Gets the full path to the sound from the sound library'''
+    return os.path.join(SOUND_DIRECTORY, filename)
 
 if not pygame.font: print('Warning, fonts disabled')
 if not pygame.mixer: print('Warning, sound disabled')
@@ -56,7 +61,7 @@ class Frame(object):
     Creates a window for drawing and event handling.
     '''
 
-    def __init__(self, title, size = (640, 480), control_panel_width = 0, fps = 60, canvas_color='Black', control_panel_color='Gray'):
+    def __init__(self, title, size = (640, 480), control_panel_width = 0, fps = 60, canvas_color='Black', control_panel_color='Gray', soundtrack=None):
         '''
         Creates the frame
         '''
@@ -69,6 +74,10 @@ class Frame(object):
         self.screen_shot_file = None
         self.screen_shot_ext = None
         self.screen_shot_count = 0
+
+        self.soundtrack = soundtrack
+        self.muted = False
+        self.soundtrack_paused = False
         
         if control_panel_width != 0:
             self.control_panel = ControlPanel(self.control_panel_size,color=control_panel_color)
@@ -236,7 +245,36 @@ class Frame(object):
             clock.tick(self.FPS)
             
         #pygame.quit()
+        self.stop_soundtrack()
     
+    def toggle_mute(self):
+        self.muted = not self.muted
+        if self.muted:
+            self.stop_soundtrack()
+        else:
+            self.play_soundtrack()
+            if self.soundtrack_paused:
+                self.pause_soundtrack()
+
+    def play_soundtrack(self):
+        if self.soundtrack is not None:
+            pygame.mixer.music.load(self.soundtrack)
+            if not self.muted:
+                pygame.mixer.music.play(loops=-1)
+
+    def stop_soundtrack(self):
+        pygame.mixer.music.stop()
+
+    def pause_soundtrack(self):
+        self.soundtrack_paused = True
+        if self.soundtrack is not None:
+            pygame.mixer.music.pause()
+
+    def unpause_soundtrack(self):
+        self.soundtrack_paused = False
+        if self.soundtrack is not None and not self.muted:
+            pygame.mixer.music.unpause()
+
     def __repr__(self):
         '''Returns the class of the object and its fields'''
         return '%s(%r)' % (self.__class__, self.__dict__)
@@ -504,24 +542,8 @@ class Sprite_Container(object):
         '''Returns the class of the object and its fields'''
         return '%s(%r)' % (self.__class__, self.__dict__)
     
-class Sound(object):
-    '''Creates a sound file, currently placeholder'''
-    
-    def __init__(self,sound_file):
-        '''Constructor'''
-        self.sound_file = sound_file
-        
-    def play(self):
-        '''Plays the sound'''
-        pass
-    
-    def pause(self):
-        '''Pauses the sound'''
-        pass
-    
-    def stop(self):
-        '''Stops the sound'''
-        pass
+class Sound(pygame.mixer.Sound):
+    '''Creates a sound effect'''
     
     def __repr__(self):
         '''Returns the class of the object and its fields'''

@@ -79,6 +79,9 @@ TETROID_IMAGE_COLOR_DICT = dict([('square','red'),
                                  ('L2','orange'),
                                  ('line','light_blue')])
 
+# Shortened clip from http://downloads.khinsider.com/game-soundtracks/album/tetris-gameboy-rip-/tetris-gameboy-02.mp3
+SOUNDTRACK_FILE = simplegui.get_sound_path("tetris-gameboy-02_short.mp3")
+
 class Block(sprite.Sprite):
     '''An individual block'''
     
@@ -282,6 +285,7 @@ def draw(canvas):
     if game_over:
         canvas.draw_rect([0.1*WIDTH,0.5*HEIGHT-BLOCK_H],[0.8*WIDTH,2*BLOCK_H],0,'Grey','Grey')
         canvas.draw_text('GAME OVER',[WIDTH/2,HEIGHT/2],40,'White',align=('center','middle'))
+        frame.stop_soundtrack()
         
     if AUTO_SCREEN_SHOT and cnt == 0 and not game_paused and not game_over:
         frame.screen_shot()
@@ -312,6 +316,7 @@ def new_game():
     game_over = False
     game_paused = False
     
+    frame.play_soundtrack()
     current_tetroid = next_tetroid()
     
     score = 0
@@ -338,17 +343,25 @@ def key_up(key):
         pause()
     elif key == 'return':
         new_game()
+    elif key == 'm':
+        frame.toggle_mute()
     
 
 def pause():
     '''Pauses the game'''
     global game_paused
     game_paused = not game_paused
+    if game_paused:
+        frame.pause_soundtrack()
+    else:
+        frame.unpause_soundtrack()
+
     
 def setup():
     '''Setup the frame and event handlers'''
     global frame, next_container, score_label, lines_label, high_score_label, images
-    frame = simplegui.Frame('Tetris',(WIDTH,HEIGHT),160)
+
+    frame = simplegui.Frame('Tetris',(WIDTH,HEIGHT),160, soundtrack=SOUNDTRACK_FILE)
     frame.set_draw_handler(draw)
     frame.set_key_down_handler(key_down)
     frame.set_key_up_handler(key_up)
@@ -366,8 +379,6 @@ def setup():
     lines_label = frame.add_label('Lines: 0')
     frame.add_label('')
     high_score_label = frame.add_label('High Score: ' + str(high_score))
-
-    
     
     if SCREEN_SHOT_FILE:
         frame.set_screen_shot_file(SCREEN_SHOT_FILE)
