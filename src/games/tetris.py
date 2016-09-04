@@ -80,7 +80,8 @@ TETROID_IMAGE_COLOR_DICT = dict([('square','red'),
                                  ('line','light_blue')])
 
 # Shortened clip from http://downloads.khinsider.com/game-soundtracks/album/tetris-gameboy-rip-/tetris-gameboy-02.mp3
-SOUNDTRACK_FILE = simplegui.get_sound_path("tetris-gameboy-02_short.mp3")
+# Converted to ogg for portability
+SOUNDTRACK_FILE = simplegui.get_sound_path("tetris-gameboy-02_short.ogg")
 
 class Block(sprite.Sprite):
     '''An individual block'''
