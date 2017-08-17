@@ -578,6 +578,19 @@ class Image(object):
     def __repr__(self):
         '''Returns the class of the object and its fields'''
         return 'Image(img_info={0!r})'.format(self.img_info)
+
+class SubImage(object):
+    '''Creates an image for the game from a larger image'''
+    def __init__(self, full_image, pos_offset, size):
+        '''Constructor'''
+        self.size = tuple(size)
+        self.img = full_image.img.subsurface(pos_offset, size)
+
+    def set_size(self, size):
+        self.size = tuple(size)
+
+    def get_size(self):
+        return self.size
         
         
 if __name__ == '__main__':
