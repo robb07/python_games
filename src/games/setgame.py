@@ -14,7 +14,7 @@ PAD_W = 10
 PAD_H = 10
 CARD_W = 120
 CARD_H = 180
-WIDTH = 6*CARD_W
+WIDTH = 7*CARD_W
 HEIGHT = 4*CARD_H
 
 CARDS_IMAGE_INFO = simplegui.Image_Info(simplegui.get_image_path('set_shapes.png'), (6*(CARD_W + PAD_W), 6*(CARD_H + PAD_H)))
@@ -99,11 +99,12 @@ def setup():
 
     all_cards_image = simplegui.Image(CARDS_IMAGE_INFO)
 
-    new_game()
+    return frame
     
 
 if __name__ == '__main__':
     setup()
     
+    new_game()
     frame.start()
     frame.quit()

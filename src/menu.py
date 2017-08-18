@@ -14,6 +14,7 @@ from games import pong
 from games import snake
 from games import tetris
 from games import cryptoquip
+from games import setgame
 
 HEIGHT = 400
 CONTROL_WIDTH = 200
@@ -55,6 +56,10 @@ def cryptoquip_starter():
     '''Starts the cryptoquip game'''
     game_starter(cryptoquip)
     
+def setgame_starter():
+    '''Starts the set game'''
+    game_starter(setgame)
+    
 def key_up(key):
     '''Handles the key up events'''
     if key == 'down' or key =='right':
@@ -92,6 +97,7 @@ def setup():
     buttons.append(frame.add_button('Snake', snake_starter, BUTTON_WIDTH, BUTTON_FONT_SIZE))
     buttons.append(frame.add_button('Breakout', breakout_starter, BUTTON_WIDTH, BUTTON_FONT_SIZE))
     buttons.append(frame.add_button('Cryptoquip', cryptoquip_starter, BUTTON_WIDTH, BUTTON_FONT_SIZE))
+    buttons.append(frame.add_button('Set', setgame_starter, BUTTON_WIDTH, BUTTON_FONT_SIZE))
     
     return frame
 
