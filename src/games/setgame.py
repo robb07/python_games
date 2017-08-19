@@ -28,6 +28,7 @@ deck = []
 board = dict([])
 num_sets = 0
 score = 0
+hint_label_str = ""
 
 class Card(sprite.Sprite):
     '''A Card'''
@@ -68,11 +69,30 @@ class Card(sprite.Sprite):
 
 def valid_set(cards):
     '''Checks if the set of cards is a valid set'''
-    if len(cards) != 3:
+    return valid_set_props([c.props for c in cards])
+
+def valid_set_props(card_props):
+    '''Checks if the set of card properties make a valid set'''
+    if len(card_props) != 3:
         return False
 
-    card1, card2, card3 = cards
-    return all(sum(dimension) % 3 == 0 for dimension in zip(card1.props, card2.props, card3.props))
+    card1, card2, card3 = card_props
+    return all(sum(dimension) % 3 == 0 for dimension in zip(card1, card2, card3))
+
+
+def back_track(sets_out, board_cards, card_props = []):
+    '''Finds all possible sets currently on the board'''
+    if card_props not in sets_out and valid_set_props(card_props):
+        sets_out.append(card_props)
+    elif len(card_props) >= 3:
+        return
+
+    for card in board_cards:
+        if card.props not in card_props:
+            card_props2 = list(card_props)
+            card_props2.append(card.props)
+            card_props2.sort()
+            back_track(sets_out, board_cards, card_props2)
 
 
 def mouse_left_click(pos):
@@ -88,6 +108,13 @@ def key_up(key):
         deal_more()
 
 
+def hint():
+    '''Shows how many sets are on the board'''
+    global hint_label_str, score
+    score -= 1
+    hint_label_str = "Left: {0}"
+
+
 def deal_more():
     '''Attempts to deal more cards'''
     global max_cards_on_board, score
@@ -101,13 +128,15 @@ def deal_more():
 def draw(canvas):
     '''Draw the board'''
     global deck, board, max_cards_on_board
-    global num_sets, score
+    global num_sets, score, hint_label_str
+
     for card in board.itervalues():
         card.draw(canvas)
 
     selected = [card for card in board.itervalues() if card.get_selected()]
     if len(selected) == 3:
         if valid_set(selected):
+            hint_label_str = ""
             for card in selected:
                 del board[card.get_coords()]
             if max_cards_on_board > DEFAULT_CARDS_ON_BOARD:
@@ -123,12 +152,17 @@ def draw(canvas):
     remaining_cards_label.text = "Cards: {0}".format(len(deck))
     sets_label.text = "Sets: {0}".format(num_sets)
     score_label.text = "Score: {0}".format(score)
+    hint_label.text = hint_label_str.format(len(possible_sets))
+
+    if len(deck) == 0 and len(possible_sets) == 0:
+        canvas.draw_rect((0.1*WIDTH, 0.5*HEIGHT-2*BUTTON_FONT_H), (0.8*WIDTH, 4*BUTTON_FONT_H), 0, 'Grey', 'Grey')
+        canvas.draw_text('Complete!', (WIDTH/2, HEIGHT/2), 2*BUTTON_FONT_H, 'White', align=('center','middle'))
 
 
 def new_game():
     '''Build a new deck, shuffle, and deal out the cards'''
     global deck, board, max_cards_on_board
-    global num_sets, score
+    global num_sets, score, hint_label_str
     deck = [Card(n, p, c, s) for n in xrange(3)
                              for p in xrange(3)
                              for c in xrange(3)
@@ -139,10 +173,11 @@ def new_game():
     deal_cards()
     num_sets = 0
     score = 0
+    hint_label_str = ""
 
 
 def deal_cards():
-    global deck, board, max_cards_on_board
+    global deck, board, max_cards_on_board, possible_sets, hint_label_str
     
     for i in xrange(max_cards_on_board):
         row = i % 3
@@ -152,12 +187,15 @@ def deal_cards():
             card.set_coords((row, col))
             board[(row, col)] = card
 
+    hint_label_str = ""
+    possible_sets = []
+    back_track(possible_sets, board.values())
 
 
 def setup():
     '''Setup the frame and event handlers'''
     global frame, all_cards_image
-    global remaining_cards_label, sets_label, score_label
+    global remaining_cards_label, sets_label, score_label, hint_label
 
     frame = simplegui.Frame('Set', (WIDTH, HEIGHT), CARD_W)
     frame.set_draw_handler(draw)
@@ -172,7 +210,11 @@ def setup():
     score_label = frame.add_label("")
     # ENHANCEMENT: add high score label
     frame.add_label("")
+    hint_label = frame.add_label("")
+    frame.add_label("")
 
+    frame.add_button("Hint", hint, BUTTON_W, BUTTON_FONT_H)
+    # ENHANCEMENT: add reveal one item in a set for a point reduction of 3
     frame.add_button("Deal More", deal_more, BUTTON_W, BUTTON_FONT_H)
     frame.add_button("New Game", new_game, BUTTON_W, BUTTON_FONT_H)
     
