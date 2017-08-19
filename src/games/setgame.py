@@ -16,6 +16,8 @@ CARD_W = 120
 CARD_H = 180
 WIDTH = 9*CARD_W
 HEIGHT = 4*CARD_H
+BUTTON_W = 0.9*CARD_W       
+BUTTON_FONT_H = 16
 
 CARDS_IMAGE_INFO = simplegui.Image_Info(simplegui.get_image_path('set_shapes.png'), (6*(CARD_W + PAD_W), 6*(CARD_H + PAD_H)))
 
@@ -24,6 +26,8 @@ ABS_MAX_CARDS_ON_BOARD = 21
 max_cards_on_board = 12
 deck = []
 board = dict([])
+num_sets = 0
+score = 0
 
 class Card(sprite.Sprite):
     '''A Card'''
@@ -80,17 +84,24 @@ def mouse_left_click(pos):
 
 def key_up(key):
     '''Handles key up events'''
-    global max_cards_on_board
     if key == "d":
-        max_cards_on_board = min(max_cards_on_board+3, ABS_MAX_CARDS_ON_BOARD)
+        deal_more()
+
+
+def deal_more():
+    '''Attempts to deal more cards'''
+    global max_cards_on_board, score
+    if max_cards_on_board + 3 <= ABS_MAX_CARDS_ON_BOARD and len(deck) > 0:
+        max_cards_on_board += 3
+        # TODO: only decrease score if there are viable sets left
+        score -= 2
         deal_cards()
-    elif key == "return":
-        new_game()
 
 
 def draw(canvas):
     '''Draw the board'''
     global deck, board, max_cards_on_board
+    global num_sets, score
     for card in board.itervalues():
         card.draw(canvas)
 
@@ -102,14 +113,22 @@ def draw(canvas):
             if max_cards_on_board > DEFAULT_CARDS_ON_BOARD:
                 max_cards_on_board -= 3
             deal_cards()
+            num_sets += 1
+            score += 10
         else:
             for card in selected:
                 card.set_selected(False)
+
+    # Update the labels
+    remaining_cards_label.text = "Cards: {0}".format(len(deck))
+    sets_label.text = "Sets: {0}".format(num_sets)
+    score_label.text = "Score: {0}".format(score)
 
 
 def new_game():
     '''Build a new deck, shuffle, and deal out the cards'''
     global deck, board, max_cards_on_board
+    global num_sets, score
     deck = [Card(n, p, c, s) for n in xrange(3)
                              for p in xrange(3)
                              for c in xrange(3)
@@ -118,6 +137,8 @@ def new_game():
     board = dict([])
     max_cards_on_board = DEFAULT_CARDS_ON_BOARD
     deal_cards()
+    num_sets = 0
+    score = 0
 
 
 def deal_cards():
@@ -136,8 +157,9 @@ def deal_cards():
 def setup():
     '''Setup the frame and event handlers'''
     global frame, all_cards_image
+    global remaining_cards_label, sets_label, score_label
 
-    frame = simplegui.Frame('Set', (WIDTH, HEIGHT))
+    frame = simplegui.Frame('Set', (WIDTH, HEIGHT), CARD_W)
     frame.set_draw_handler(draw)
     frame.set_mouse_left_click_handler(mouse_left_click)
     frame.set_key_up_handler(key_up)
@@ -145,6 +167,15 @@ def setup():
 
     all_cards_image = simplegui.Image(CARDS_IMAGE_INFO)
 
+    remaining_cards_label = frame.add_label("")
+    sets_label = frame.add_label("")
+    score_label = frame.add_label("")
+    # ENHANCEMENT: add high score label
+    frame.add_label("")
+
+    frame.add_button("Deal More", deal_more, BUTTON_W, BUTTON_FONT_H)
+    frame.add_button("New Game", new_game, BUTTON_W, BUTTON_FONT_H)
+    
     return frame
     
 

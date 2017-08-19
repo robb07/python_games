@@ -17,3 +17,4 @@ Here are the games in the repository:
 4. Snake
 5. Breakout
 6. World Builder -- tool for building worlds 
+7. Set
