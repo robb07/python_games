@@ -121,6 +121,10 @@ def key_up(key):
     '''Handles key up events'''
     if key == "d":
         deal_more()
+    elif key == "h":
+        hint()
+    elif key == "s":
+        show()
 
 
 def hint():
@@ -128,6 +132,35 @@ def hint():
     global hint_label_str, score
     score -= 1
     hint_label_str = "Left: {0}"
+
+
+def show():
+    '''Shows one of the cards in a possible set'''
+    global score
+
+    selected = [card for card in board.itervalues() if card.get_selected()]
+    if len(possible_sets) == 0:
+        for card in selected:
+            card.set_selected(False)
+        return
+
+    options = []
+    if len(selected) != 0:
+        options = [p for p in possible_sets if all(c.props in p for c in selected)]
+
+    if len(options) > 0:
+        shown_props = random.choice(options)
+    else:
+        for card in selected:
+            card.set_selected(False)
+        shown_props = random.choice(possible_sets)
+
+    card_options = [card for card in board.itervalues() if card.props in shown_props and not card.get_selected()]
+    if 1 < len(card_options):
+        card = random.choice(card_options)
+        card.set_selected(True)
+        score -= 3
+
 
 
 def deal_more():
@@ -240,7 +273,7 @@ def setup():
     frame.add_label("")
 
     frame.add_button("Hint", hint, BUTTON_W, BUTTON_FONT_H)
-    # ENHANCEMENT: add reveal one item in a set for a point reduction of 3
+    frame.add_button("Show 1", show, BUTTON_W, BUTTON_FONT_H)
     frame.add_button("Deal More", deal_more, BUTTON_W, BUTTON_FONT_H)
     frame.add_button("New Game", new_game, BUTTON_W, BUTTON_FONT_H)
     
