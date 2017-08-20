@@ -7,8 +7,14 @@ Created August 16, 2017
 '''
 
 import random
+import os
 from game_tools import simplegui
 from game_tools import sprite
+
+HISTORY_DIR = os.path.join(os.path.expanduser("~"),".python_games")
+if not os.path.exists(HISTORY_DIR):
+    os.makedirs(HISTORY_DIR)
+HISTORY = os.path.join(HISTORY_DIR, "setgame")
 
 PAD_W = 10
 PAD_H = 10
@@ -16,7 +22,8 @@ CARD_W = 120
 CARD_H = 180
 WIDTH = 9*CARD_W
 HEIGHT = 4*CARD_H
-BUTTON_W = 0.9*CARD_W       
+CONTROL_W = int(1.2*CARD_W)
+BUTTON_W = 0.9*CONTROL_W      
 BUTTON_FONT_H = 16
 
 CARDS_IMAGE_INFO = simplegui.Image_Info(simplegui.get_image_path('set_shapes.png'), (6*(CARD_W + PAD_W), 6*(CARD_H + PAD_H)))
@@ -29,6 +36,14 @@ board = dict([])
 num_sets = 0
 score = 0
 hint_label_str = ""
+
+high_score = 0
+if os.path.exists(HISTORY):
+    try:
+        with open(HISTORY, 'r') as f_in:
+            high_score = int(f_in.next().strip())
+    except Exception as e:
+        pass
 
 class Card(sprite.Sprite):
     '''A Card'''
@@ -120,30 +135,21 @@ def deal_more():
     global max_cards_on_board, score
     if max_cards_on_board + 3 <= ABS_MAX_CARDS_ON_BOARD and len(deck) > 0:
         max_cards_on_board += 3
-        # TODO: only decrease score if there are viable sets left
-        score -= 2
+        if len(possible_sets) > 0:
+            score -= 2
         deal_cards()
 
 
 def draw(canvas):
     '''Draw the board'''
-    global deck, board, max_cards_on_board
-    global num_sets, score, hint_label_str
-
     for card in board.itervalues():
         card.draw(canvas)
 
     selected = [card for card in board.itervalues() if card.get_selected()]
     if len(selected) == 3:
         if valid_set(selected):
-            hint_label_str = ""
-            for card in selected:
-                del board[card.get_coords()]
-            if max_cards_on_board > DEFAULT_CARDS_ON_BOARD:
-                max_cards_on_board -= 3
+            take_set(selected)
             deal_cards()
-            num_sets += 1
-            score += 10
         else:
             for card in selected:
                 card.set_selected(False)
@@ -153,10 +159,30 @@ def draw(canvas):
     sets_label.text = "Sets: {0}".format(num_sets)
     score_label.text = "Score: {0}".format(score)
     hint_label.text = hint_label_str.format(len(possible_sets))
+    high_score_label.text = "High Score: {0}".format(high_score)
 
     if len(deck) == 0 and len(possible_sets) == 0:
         canvas.draw_rect((0.1*WIDTH, 0.5*HEIGHT-2*BUTTON_FONT_H), (0.8*WIDTH, 4*BUTTON_FONT_H), 0, 'Grey', 'Grey')
         canvas.draw_text('Complete!', (WIDTH/2, HEIGHT/2), 2*BUTTON_FONT_H, 'White', align=('center','middle'))
+
+
+def take_set(cards):
+    '''Takes the valid set off the board'''
+    global board, max_cards_on_board
+    global num_sets, score, high_score
+
+    for card in cards:
+        del board[card.get_coords()]
+
+    if max_cards_on_board > DEFAULT_CARDS_ON_BOARD:
+        max_cards_on_board -= 3
+
+    num_sets += 1
+    score += 10
+    if score > high_score:
+        high_score = score
+        with open(HISTORY, 'w') as f_out:
+            f_out.write(str(high_score))
 
 
 def new_game():
@@ -177,7 +203,7 @@ def new_game():
 
 
 def deal_cards():
-    global deck, board, max_cards_on_board, possible_sets, hint_label_str
+    global deck, board, possible_sets, hint_label_str
     
     for i in xrange(max_cards_on_board):
         row = i % 3
@@ -195,9 +221,9 @@ def deal_cards():
 def setup():
     '''Setup the frame and event handlers'''
     global frame, all_cards_image
-    global remaining_cards_label, sets_label, score_label, hint_label
+    global remaining_cards_label, sets_label, score_label, high_score_label, hint_label
 
-    frame = simplegui.Frame('Set', (WIDTH, HEIGHT), CARD_W)
+    frame = simplegui.Frame('Set', (WIDTH, HEIGHT), CONTROL_W)
     frame.set_draw_handler(draw)
     frame.set_mouse_left_click_handler(mouse_left_click)
     frame.set_key_up_handler(key_up)
@@ -208,7 +234,7 @@ def setup():
     remaining_cards_label = frame.add_label("")
     sets_label = frame.add_label("")
     score_label = frame.add_label("")
-    # ENHANCEMENT: add high score label
+    high_score_label = frame.add_label("")
     frame.add_label("")
     hint_label = frame.add_label("")
     frame.add_label("")
