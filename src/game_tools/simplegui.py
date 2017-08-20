@@ -260,7 +260,7 @@ class Frame(object):
         if self.soundtrack is not None:
             pygame.mixer.music.load(self.soundtrack)
             if not self.muted:
-                pygame.mixer.music.play(loops=-1)
+                pygame.mixer.music.play(-1)
 
     def stop_soundtrack(self):
         pygame.mixer.music.stop()
