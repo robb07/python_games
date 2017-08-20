@@ -130,7 +130,8 @@ def key_up(key):
 def hint():
     '''Shows how many sets are on the board'''
     global hint_label_str, score
-    score -= 1
+    if len(possible_sets) > 0 and hint_label_str == "":
+        score -= 1
     hint_label_str = "Left: {0}"
 
 
