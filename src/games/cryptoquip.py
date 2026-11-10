@@ -5,7 +5,7 @@ Created on Jul 16, 2014
 @author: Robb
 '''
 
-from game_tools import simplegui
+from src.game_tools import simplegui
 import string
 import random
 import os

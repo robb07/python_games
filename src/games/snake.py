@@ -8,8 +8,8 @@ Created on Jun 11, 2014
 @author: Robb
 '''
 
-from game_tools import simplegui
-from game_tools import sprite
+from src.game_tools import simplegui
+from src.game_tools import sprite
 import random
 
 SCREEN_SHOT_FILE = None

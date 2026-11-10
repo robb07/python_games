@@ -8,8 +8,8 @@ Created August 16, 2017
 
 import random
 import os
-from game_tools import simplegui
-from game_tools import sprite
+from src.game_tools import simplegui
+from src.game_tools import sprite
 
 HISTORY_DIR = os.path.join(os.path.expanduser("~"),".python_games")
 if not os.path.exists(HISTORY_DIR):

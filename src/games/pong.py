@@ -7,7 +7,7 @@ Created on Jun 8, 2014
 @author: Robb
 '''
 
-from game_tools import simplegui
+from src.game_tools import simplegui
 import random
 import math
 

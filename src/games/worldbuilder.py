@@ -6,10 +6,10 @@ Created on Jun 23, 2014
 
 @author: Robb
 '''
-
-from game_tools import simplegui
-from games import world
-from game_tools import sprite
+from src import games
+from src.game_tools import simplegui
+from src.games import world
+from src.game_tools import sprite
 
 WIDTH = 600
 HEIGHT = 600
@@ -76,7 +76,7 @@ def key_up(key):
         else:
             cursor = new_cursor([0,0])
     elif key == 'p':
-        print the_world
+        print(the_world)
     elif key == 'b':
         the_world.background_color = BACKGROUND_COLORS[(BACKGROUND_COLORS.index(the_world.background_color)+1) % len(BACKGROUND_COLORS)]
     elif key == 'd':
