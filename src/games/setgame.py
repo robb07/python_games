@@ -61,7 +61,7 @@ class Card(sprite.Sprite):
         image = simplegui.SubImage(all_cards_image, pos_offset, size)
         super(Card, self).__init__(name='Card' + "".join(map(str, self.props)), size=size, image=image)
 
-    def set_coords(self, (row, col)):
+    def set_coords(self, row, col):
         self.coords = (row, col)
         self.set_pos(((1+col)*(CARD_W+PAD_W), (1+row)*(CARD_H+PAD_H)))
 

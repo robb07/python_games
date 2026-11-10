@@ -27,7 +27,7 @@ ciphertext = ''
 working_key = dict([])
 
 controls = dict([('up',['up','left']),('down',['down','right'])])
-control_states = dict([(control,False) for control in controls.iterkeys()]) 
+control_states = dict([(control,False) for control in controls.keys()])
 
 cnt = 0
 CONTROL_TICK = 10
