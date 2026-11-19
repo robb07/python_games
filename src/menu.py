@@ -85,7 +85,7 @@ def setup():
     '''Setup the menu for the games.'''
     global frame, buttons
     
-    frame = simplegui.Frame('Menu',(0,HEIGHT),CONTROL_WIDTH)
+    frame = simplegui.Frame('🎮Menu',(0,HEIGHT),CONTROL_WIDTH)
     frame.set_key_up_handler(key_up)
     
     frame.add_label('Menu')

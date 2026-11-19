@@ -68,7 +68,7 @@ class Frame(object):
     '''
 
     def __init__(self, title, size=(640, 480), control_panel_width=0, fps=60, canvas_color='Black',
-                 control_panel_color='Gray', soundtrack=None):
+                 control_panel_color='black', soundtrack=None):
         '''
         Creates the frame
         '''
@@ -282,7 +282,7 @@ class Canvas(object):
     def draw_background(self):
         self.Surface.fill(self.background_color)
 
-    def draw_rect(self, pos, size, line_width, line_color, fill_color=None):
+    def draw_rect(self, pos, size, line_width, line_color, fill_color=None, border_radius=10):
         '''draw a rectangle shape'''
         pos = tuple([int(p) for p in pos])
         size = tuple([int(s) for s in size])
@@ -290,10 +290,10 @@ class Canvas(object):
 
         if fill_color:
             fill_color = pygame.Color(fill_color) if isinstance(fill_color, str) else fill_color
-            pygame.draw.rect(self.Surface, fill_color, Rect, 0)
+            pygame.draw.rect(self.Surface, fill_color, Rect, 0, border_radius=10)
 
         line_color = pygame.Color(line_color) if isinstance(line_color, str) else line_color
-        pygame.draw.rect(self.Surface, line_color, Rect, int(line_width))
+        pygame.draw.rect(self.Surface, line_color, Rect, int(line_width), border_radius=10)
 
     def draw_polygon(self, point_list, line_width, line_color, fill_color=None):
         '''draw a shape with any number of sides'''
@@ -443,7 +443,7 @@ class ControlPanel(Canvas):
 class Button(object):
     '''Creates a button.'''
 
-    def __init__(self, text, handler, pos, width, font_height, color='grey'):
+    def __init__(self, text, handler, pos, width, font_height, color='yellow', hover_color='green', text_color='blue', border_radius=20):
         '''Initializes the button'''
         self.text = text
         self.handler = handler
@@ -451,6 +451,9 @@ class Button(object):
         self.font_h = font_height
         self.size = (width, 2 * self.font_h)
         self.color = color
+        self.hover_color = hover_color
+        self.text_color = text_color
+        self.border_radius = border_radius
 
     def call_handler(self):
         '''Calls the button's event handler'''
@@ -459,8 +462,8 @@ class Button(object):
 
     def draw(self, canvas):
         '''Draws the button'''
-        canvas.draw_rect((self.pos[0] - self.size[0] / 2, self.pos[1]), self.size, 1, 'black', self.color)
-        canvas.draw_text(self.text, (self.pos[0], self.pos[1] + self.size[1] / 2), self.font_h, 'black', 'sans-serif',
+        canvas.draw_rect((self.pos[0] - self.size[0] / 2, self.pos[1]), self.size, 1, 'black', self.color, self.border_radius)
+        canvas.draw_text(self.text, (self.pos[0], self.pos[1] + self.size[1] / 2), self.font_h, self.text_color, 'serif',
                          ('center', 'middle'))
 
     def click_check(self, click_pos):
@@ -485,7 +488,7 @@ class Label(object):
 
     def draw(self, canvas):
         '''Draws the label'''
-        canvas.draw_text(self.text, (self.pos[0], self.pos[1] + self.size[1] / 2), self.font_h, 'black', 'sans-serif',
+        canvas.draw_text(self.text, (self.pos[0], self.pos[1] + self.size[1] / 2), self.font_h, 'white', 'sans-serif',
                          ('center', 'middle'))
 
     def __repr__(self):
