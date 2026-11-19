@@ -106,7 +106,9 @@ def draw(canvas):
             pos = get_space_pos(space)
             
             canvas.draw_rect(pos, (TILE_W, TILE_H), 4, 'Black', TILE_COLOR[board[space] % 2])
-            
+            canvas.draw_text('Deslize os numeros e os coloquem em ordem crescente', [750 // 2, 20],
+                             20, 'SeaGreen', align=('center', 'middle'))
+
             #canvas.draw_text(str(board[space]), pos, FONT_H, LETTER_COLOR[board[space] % 2], 'sans-serif', ('left', 'top'))
             canvas.draw_text(str(board[space]), (pos[0] + TILE_W/2, pos[1] + TILE_H/2), FONT_H, LETTER_COLOR[board[space] % 2], 'sans-serif', ('center', 'middle'))
             #canvas.draw_text(str(board[space]), [pos[0] + TILE_W, pos[1] + TILE_H], FONT_H, LETTER_COLOR[board[space] % 2], 'sans-serif', ('right', 'bottom'))
