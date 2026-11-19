@@ -65,8 +65,8 @@ def get_space_pos(space):
 
 def get_space(pos):
     '''Finds the space for a position'''
-    col = (pos[0] - TILE_W) // TILE_W
-    row = (pos[1] - TILE_H) // TILE_H
+    col = int((pos[0] - TILE_W) // TILE_W)
+    row = int((pos[1] - TILE_H) // TILE_H)
     
     if col in range(NUM_COLS) and row in range(NUM_ROWS):
         return COLS[col] + ROWS[row]
