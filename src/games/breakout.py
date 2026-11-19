@@ -113,8 +113,8 @@ def draw(canvas):
         point_sprites.remove(point_sprite)
 
     if game_over:
-        canvas.draw_rect([int(0.25 * WIDTH), int(0.5 * HEIGHT - 40)], [int(0.5 * WIDTH), 80], 2, 'Black', 'Gray')
-        canvas.draw_text('GAME OVER', [WIDTH // 2, HEIGHT // 2], 40, 'White', align=('center', 'middle'))
+        canvas.draw_rect([int(0.25 * WIDTH), int(0.5 * HEIGHT - 40)], [int(0.5 * WIDTH), 80], 2, 'Black', 'yellow')
+        canvas.draw_text('GAME OVER', [WIDTH // 2, HEIGHT // 2], 40, 'blue', align=('center', 'middle'))
 
     if sum([len(brick_row) for brick_row in brick_rows]) == 0 and ball and continuous_to_grid(ball.pos)[
         1] > NUM_ROWS + TOP_GAP + 1:
