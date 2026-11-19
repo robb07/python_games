@@ -99,6 +99,7 @@ def draw(canvas):
 
     canvas.draw_text(str(level), grid_to_continuous((GRID_WIDTH - 0.5, 1)), 30, 'White', align=('right', 'middle'))
     canvas.draw_text(str(score), grid_to_continuous((GRID_WIDTH - 1, 1)), 30, 'White', align=('right', 'middle'))
+    canvas.draw_text('Quebre todos blocos e não deixe a bola cair para ganhar', [WIDTH // 2, 70], 20, 'DeepSkyBlue', align=('center', 'middle'))
 
     for spare in spare_balls:
         spare.draw(canvas)

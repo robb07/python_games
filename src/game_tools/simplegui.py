@@ -40,14 +40,14 @@ FONT_DICT = {}
 
 COLOR_PALETTE = dict([('Black', 'Black'),
                       ('White', 'Ivory'),
-                      ('Gray', 'Gray'),
+                      ('DeepPink', 'HotPink'),
                       ('Red', 'FireBrick'),
                       ('Blue', 'SteelBlue'),
                       ('Purple', 'Plum'),
-                      ('Green', (60, 179, 71)),
+                      ('SpringGreen', (60, 179, 71)),
                       ('Yellow', 'Gold'),
                       ('Orange', (220, 94, 56)),
-                      ('LightBlue', 'SkyBlue')])
+                      ('SkyBlue', (32, 223, 219))])
 
 BACKGROUND_COLORS = list(COLOR_PALETTE.keys())
 
