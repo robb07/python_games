@@ -5,7 +5,7 @@ Created on Jul 16, 2014
 @author: Robb
 '''
 
-from game_tools import simplegui
+from src.game_tools import simplegui
 import string
 import random
 import os
@@ -27,7 +27,7 @@ ciphertext = ''
 working_key = dict([])
 
 controls = dict([('up',['up','left']),('down',['down','right'])])
-control_states = dict([(control,False) for control in controls.iterkeys()]) 
+control_states = dict([(control,False) for control in controls.keys()])
 
 cnt = 0
 CONTROL_TICK = 10
@@ -57,6 +57,7 @@ def draw(canvas):
     working_text = encrypt_substitute(ciphertext, working_key)
     draw_message(canvas, ciphertext, BORDER, FONT_DIM, MESSAGE_ROW_DIM)
     draw_message(canvas, working_text, (BORDER[0], BORDER[1] + 1.5*FONT_DIM[1]), FONT_DIM, MESSAGE_ROW_DIM, selected_index=(selected_index if selected_panel == 'message' else None))
+    canvas.draw_text('Descubra que letra está no seu lugar certo e decodifique a mensagem', [WIDTH // 2, 20], 20, 'Magenta', align=('center', 'middle'))
     if working_text == plaintext:
         canvas.draw_text('You win!',(BORDER[0],HEIGHT - BORDER[1] - 2*FONT_DIM[1]), 2*FONT_DIM[1], FONT_COLOR)
         

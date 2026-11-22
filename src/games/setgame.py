@@ -8,8 +8,8 @@ Created August 16, 2017
 
 import random
 import os
-from game_tools import simplegui
-from game_tools import sprite
+from src.game_tools import simplegui
+from src.game_tools import sprite
 
 HISTORY_DIR = os.path.join(os.path.expanduser("~"),".python_games")
 if not os.path.exists(HISTORY_DIR):
@@ -61,7 +61,7 @@ class Card(sprite.Sprite):
         image = simplegui.SubImage(all_cards_image, pos_offset, size)
         super(Card, self).__init__(name='Card' + "".join(map(str, self.props)), size=size, image=image)
 
-    def set_coords(self, (row, col)):
+    def set_coords(self, row, col):
         self.coords = (row, col)
         self.set_pos(((1+col)*(CARD_W+PAD_W), (1+row)*(CARD_H+PAD_H)))
 
@@ -112,7 +112,7 @@ def back_track(sets_out, board_cards, card_props = []):
 
 def mouse_left_click(pos):
     '''Hndles left mouse clicks'''
-    for card in board.itervalues():
+    for card in board.values():
         if card.contains(pos):
             card.set_selected(not card.get_selected())
 
@@ -139,7 +139,7 @@ def show():
     '''Shows one of the cards in a possible set'''
     global score
 
-    selected = [card for card in board.itervalues() if card.get_selected()]
+    selected = [card for card in board.values() if card.get_selected()]
     if len(possible_sets) == 0:
         for card in selected:
             card.set_selected(False)
@@ -156,7 +156,7 @@ def show():
             card.set_selected(False)
         shown_props = random.choice(possible_sets)
 
-    card_options = [card for card in board.itervalues() if card.props in shown_props and not card.get_selected()]
+    card_options = [card for card in board.values() if card.props in shown_props and not card.get_selected()]
     if 1 < len(card_options):
         card = random.choice(card_options)
         card.set_selected(True)
@@ -176,10 +176,10 @@ def deal_more():
 
 def draw(canvas):
     '''Draw the board'''
-    for card in board.itervalues():
+    for card in board.values():
         card.draw(canvas)
 
-    selected = [card for card in board.itervalues() if card.get_selected()]
+    selected = [card for card in board.values() if card.get_selected()]
     if len(selected) == 3:
         if valid_set(selected):
             take_set(selected)
@@ -223,10 +223,10 @@ def new_game():
     '''Build a new deck, shuffle, and deal out the cards'''
     global deck, board, max_cards_on_board
     global num_sets, score, hint_label_str
-    deck = [Card(n, p, c, s) for n in xrange(3)
-                             for p in xrange(3)
-                             for c in xrange(3)
-                             for s in xrange(3)]
+    deck = [Card(n, p, c, s) for n in range(3)
+                             for p in range(3)
+                             for c in range(3)
+                             for s in range(3)]
     random.shuffle(deck)
     board = dict([])
     max_cards_on_board = DEFAULT_CARDS_ON_BOARD
@@ -239,12 +239,12 @@ def new_game():
 def deal_cards():
     global deck, board, possible_sets, hint_label_str
     
-    for i in xrange(max_cards_on_board):
+    for i in range(max_cards_on_board):
         row = i % 3
         col = i // 3
         if len(deck) > 0 and len(board) < max_cards_on_board and (row, col) not in board:
             card = deck.pop()
-            card.set_coords((row, col))
+            card.set_coords(row, col)
             board[(row, col)] = card
 
     hint_label_str = ""

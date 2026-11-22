@@ -7,7 +7,7 @@ Created on Jun 7, 2014
 @author: Robb
 '''
 
-from game_tools import simplegui
+from src.game_tools import simplegui
 import random
 
 # globals
@@ -65,8 +65,8 @@ def get_space_pos(space):
 
 def get_space(pos):
     '''Finds the space for a position'''
-    col = (pos[0] - TILE_W) // TILE_W
-    row = (pos[1] - TILE_H) // TILE_H
+    col = int((pos[0] - TILE_W) // TILE_W)
+    row = int((pos[1] - TILE_H) // TILE_H)
     
     if col in range(NUM_COLS) and row in range(NUM_ROWS):
         return COLS[col] + ROWS[row]
@@ -106,7 +106,9 @@ def draw(canvas):
             pos = get_space_pos(space)
             
             canvas.draw_rect(pos, (TILE_W, TILE_H), 4, 'Black', TILE_COLOR[board[space] % 2])
-            
+            canvas.draw_text('Deslize os numeros e os coloquem em ordem crescente', [750 // 2, 20],
+                             20, 'SeaGreen', align=('center', 'middle'))
+
             #canvas.draw_text(str(board[space]), pos, FONT_H, LETTER_COLOR[board[space] % 2], 'sans-serif', ('left', 'top'))
             canvas.draw_text(str(board[space]), (pos[0] + TILE_W/2, pos[1] + TILE_H/2), FONT_H, LETTER_COLOR[board[space] % 2], 'sans-serif', ('center', 'middle'))
             #canvas.draw_text(str(board[space]), [pos[0] + TILE_W, pos[1] + TILE_H], FONT_H, LETTER_COLOR[board[space] % 2], 'sans-serif', ('right', 'bottom'))

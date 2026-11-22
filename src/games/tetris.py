@@ -5,8 +5,8 @@ Created on Jun 9, 2014
 
 @author: Robb
 '''
-from game_tools import simplegui
-from game_tools import sprite
+from src.game_tools import simplegui
+from src.game_tools import sprite
 import random
 import os
 
@@ -240,7 +240,7 @@ def draw(canvas):
         cnt = (cnt + 1) % speed
         
         if cnt % 2 == 0:
-            for control, state in control_state.iteritems():
+            for control, state in control_state.items():
                 if state:
                     if control == 'left':
                         current_tetroid.move_left()
@@ -293,7 +293,7 @@ def draw(canvas):
     
 def new_tetroid():
     '''Creates a new random Tetroid'''
-    key = random.choice(TETROID_OFFSET_DICT.keys())
+    key = random.choice(list(TETROID_OFFSET_DICT.keys()))
     image = images[TETROID_IMAGE_COLOR_DICT[key]]
     tetroid = Tetroid(key,[0,0],TETROID_OFFSET_DICT[key],TETROID_COLOR_DICT[key],image=image)
     
@@ -368,9 +368,9 @@ def setup():
     frame.set_key_up_handler(key_up)
     
     if IMAGES_ON:
-        images = dict([(key, simplegui.Image(image_info)) for key, image_info in image_infos.iteritems()])
+        images = dict([(key, simplegui.Image(image_info)) for key, image_info in image_infos.items()])
     else:
-        images = dict([(key, None) for key, image_info in image_infos.iteritems()])
+        images = dict([(key, None) for key, image_info in image_infos.items()])
     
     #Build the control panel
     frame.add_label('')
