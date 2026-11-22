@@ -24,8 +24,8 @@ SCORE_FONT_H = 40
 BALL_RADIUS = 10
 PAD_WIDTH = 8
 PAD_HEIGHT = 80
-HALF_PAD_WIDTH = PAD_WIDTH / 2
-HALF_PAD_HEIGHT = PAD_HEIGHT / 2
+HALF_PAD_WIDTH = PAD_WIDTH // 2
+HALF_PAD_HEIGHT = PAD_HEIGHT // 2
 LEFT = False
 RIGHT = True
 HORIZONTAL = True
@@ -41,6 +41,14 @@ COMPUTER_PADDLE_FACTOR = 1.1
 SPEEDUP_FACTOR = 1.1
 
 mute_off = True
+sound_beeep = None
+sound_peeeeeep = None
+sound_plop = None
+
+def play_sound(sound):
+    """Reproduz o efeito sonoro com segurança caso o áudio esteja ativo e carregado."""
+    if mute_off and sound is not None:
+        sound.play()
 
 paddles = []
 
@@ -59,10 +67,10 @@ class Paddle(object):
         self.score = 0
         self.score_pos = score_pos
         self.human = human
-    
+
     def key_press(self, key, state):
         '''Changes the control state for a key'''
-        if self.key_controls.has_key(key):
+        if key in self.key_controls:
             self.control_states[self.key_controls[key]] = state
     
     def set_human(self,human):
@@ -88,7 +96,7 @@ class Paddle(object):
         else:
             return 0
         
-        if ball_pos_est[0] > random.randrange(WIDTH/4,3*WIDTH/4):
+        if ball_pos_est[0] > random.randrange(WIDTH // 4, 3 * WIDTH // 4):
             return self.paddle_vel
         
         dist = ball_pos_est[1] - (self.pos[1] + HALF_PAD_HEIGHT)
@@ -190,16 +198,14 @@ class Ball(object):
         else:
             self.vel[0] *= speedup
             self.vel[1] *= -speedup
-    
+
     def collide_top_and_bottom(self):
         """Bounces the ball off the ceiling and floor"""
         if self.pos[1] - self.radius < 0 and self.vel[1] < 0:
-            #ceiling
-            if mute_off: sound_plop.play()
+            play_sound(sound_plop)
             self.bounce(VERTICAL)
         elif self.pos[1] + self.radius > HEIGHT and self.vel[1] > 0:
-            #floor
-            if mute_off: sound_plop.play()
+            play_sound(sound_plop)
             self.bounce(VERTICAL)
             
             
@@ -365,10 +371,7 @@ def setup():
     
     #frame.add_label(" ")
     frame.add_button("Mute",mute, 0.9*BUTTON_W, BUTTON_FONT_H)
-    
-    #sound_beeep = simplegui.Sound('https://dl.dropboxusercontent.com/u/22969407/sounds_ping_pong_8bit/ping_pong_8bit_beeep.ogg')
-    #sound_peeeeeep = simplegui.Sound('https://dl.dropboxusercontent.com/u/22969407/sounds_ping_pong_8bit/ping_pong_8bit_peeeeeep.ogg')
-    #sound_plop = simplegui.Sound('https://dl.dropboxusercontent.com/u/22969407/sounds_ping_pong_8bit/ping_pong_8bit_plop.ogg')
+
     
     return frame
 
